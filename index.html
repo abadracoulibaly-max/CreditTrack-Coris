@@ -1353,15 +1353,20 @@ function renderAnalyseForm(d) {
   fieldKeys.forEach(k => { const el = document.getElementById("risk_" + k); if (el) el.value = riskA[k] || ""; });
 
   // Permissions : seul le CAF du dossier peut modifier sa fiche
-  const canEditCAF = currentRole === "ca" && d.ca === currentUser.nom;
+  // Le CAF ne peut modifier sa fiche que tant que le dossier n'a pas quitté son giron :
+  // soit avant toute transmission (statut "new"), soit après ajournement revenu chez lui
+  const isCAFOwner = currentRole === "ca" && d.ca === currentUser.nom;
+  const canEditCAF = isCAFOwner && (d.statut === "new" || d.statut === "adjourned");
   setFieldsState("caf", fieldKeys, !canEditCAF);
   document.getElementById("btn-save-caf-analyse").style.display = canEditCAF ? "" : "none";
   document.getElementById("caf-analyse-info").textContent = canEditCAF
     ? "📝 Vous pouvez compléter cette fiche d'analyse pour votre dossier."
     : "📝 Fiche remplie par le Chargé d'affaires lors de l'instruction du dossier (lecture seule).";
 
-  // Permissions : seul le Responsable risque peut modifier sa fiche
-  const canEditRisk = currentRole === "resp_risque";
+  // Le Responsable risque ne peut modifier sa fiche que tant qu'il est l'acteur de l'étape en cours
+  const circuit = CIRCUITS[d.tranche];
+  const currentStepRoleForAnalyse = circuit ? circuit.roles[d.etape_idx] : null;
+  const canEditRisk = currentRole === "resp_risque" && currentStepRoleForAnalyse === "resp_risque" && d.statut === "progress";
   setFieldsState("risk", fieldKeys, !canEditRisk);
   document.getElementById("btn-save-risk-analyse").style.display = canEditRisk ? "" : "none";
   document.getElementById("risk-analyse-info").textContent = canEditRisk
