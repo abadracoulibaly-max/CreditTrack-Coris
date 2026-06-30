@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CréditTrack — Coris Mésofinance CI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  :root {
+    --navy: #1A3A7A; --blue: #1A5CA8; --red: #CC0000; --gold: #C8A84B;
+    --navy-light: #e8eef7; --bg: #F5F7FA; --white: #ffffff;
+    --text: #1a2535; --muted: #6b7a99; --border: #dde3ef; --success: #16a34a;
+    --purple: #6b21a8; --purple-l: #f3e8ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+  /* ===== LOGIN ===== */
+  .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 100%);}
+  .login-box{background:white;border-radius:16px;padding:40px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+  .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .login-logo img{height:44px;}
+  .login-logo-fallback{width:44px;height:44px;background:var(--navy);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--gold);}
+  .login-title{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+  .login-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+  .login-form .form-group{margin-bottom:16px;}
+  .login-form label{display:block;font-size:11px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .login-form input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);}
+  .login-form input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,92,168,.1);background:white;}
+  .login-btn{width:100%;background:var(--navy);color:white;border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .login-btn:hover{background:var(--blue);}
+  .login-btn:disabled{background:var(--muted);cursor:not-allowed;}
+  .login-error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
+  .login-footer{text-align:center;margin-top:20px;font-size:12px;color:var(--muted);}
+
+  /* ===== HEADER ===== */
+  header{background:var(--navy);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(26,58,122,.2);}
+  .header-logo{display:flex;align-items:center;gap:12px;}
+  .logo-img{height:40px;filter:brightness(0) invert(1);}
+  .logo-fallback{width:38px;height:38px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);}
+  .header-info{display:flex;flex-direction:column;}
+  .header-title{color:#fff;font-size:14px;font-weight:600;}
+  .header-sub{color:rgba(255,255,255,.5);font-size:11px;}
+  .header-right{display:flex;align-items:center;gap:12px;}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:5px;}
+  .header-status{color:rgba(255,255,255,.7);font-size:11px;display:flex;align-items:center;}
+  .user-badge{display:flex;flex-direction:column;align-items:flex-end;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 12px;cursor:pointer;}
+  .user-badge-name{color:white;font-size:12px;font-weight:500;}
+  .user-badge-role{color:var(--gold);font-size:10px;font-weight:600;text-transform:uppercase;}
+  .logout-btn{background:rgba(204,0,0,.3);border:1px solid rgba(204,0,0,.5);color:white;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;}
+  .logout-btn:hover{background:var(--red);}
+
+  /* ===== NOTIF BELL ===== */
+  .nbtn{position:relative;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);cursor:pointer;padding:8px 10px;font-size:16px;color:white;border-radius:6px;}
+  .ndot{position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--navy);display:none;}
+  .ndot.show{display:block;}
+  .npanel{position:fixed;top:62px;right:20px;width:360px;max-width:90vw;background:white;border:1px solid var(--border);border-radius:12px;z-index:200;box-shadow:0 12px 32px rgba(0,0,0,.18);display:none;max-height:70vh;overflow-y:auto;}
+  .npanel.open{display:block;}
+  .nphead{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;color:var(--navy);}
+  .npi{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;}
+  .npi:hover{background:var(--bg);}
+  .npi.unread{background:var(--navy-light);}
+  .npi-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+  .npi-body{font-size:12px;color:var(--muted);}
+  .npi-time{font-size:11px;color:var(--muted);margin-top:4px;}
+
+  /* ===== NAV TABS ===== */
+  .nav-tabs{background:var(--white);border-bottom:1px solid var(--border);display:flex;padding:0 20px;overflow-x:auto;}
+  .nav-tab{padding:13px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;white-space:nowrap;background:none;font-family:'Inter',sans-serif;transition:all .15s;}
+  .nav-tab:hover{color:var(--blue);}
+  .nav-tab.active{color:var(--navy);border-bottom-color:var(--gold);font-weight:600;}
+
+  /* ===== MAIN ===== */
+  .main{max-width:1100px;margin:0 auto;padding:24px 18px 70px;}
+  .view{display:none;} .view.active{display:block;}
+  .section-header{margin-bottom:20px;}
+  .section-title{font-size:19px;font-weight:700;color:var(--navy);margin-bottom:3px;}
+  .section-desc{font-size:13px;color:var(--muted);}
+  .card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:24px;margin-bottom:18px;}
+
+  /* ===== FORM ===== */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  .form-group.full{grid-column:1/-1;}
+  label{font-size:11px;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;}
+  .required::after{content:' *';color:var(--red);}
+  input,select,textarea{padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);width:100%;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,92,168,.1);background:#fff;}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7a99' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px;}
+  textarea{resize:vertical;min-height:70px;}
+  input:disabled{background:var(--border);color:var(--muted);}
+
+  .checkbox-grid{display:flex;flex-wrap:wrap;gap:12px;}
+  .checkbox-label{display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:9px 14px;transition:all .15s;}
+  .checkbox-label:hover{border-color:var(--blue);}
+  .checkbox-label input{width:auto;accent-color:var(--navy);}
+
+  .tranche-box{padding:12px 16px;border-radius:8px;background:var(--navy-light);border:1.5px solid var(--border);font-size:13px;color:var(--muted);}
+  .tranche-box.active{color:var(--navy);font-weight:600;}
+
+  .btn-primary{background:var(--navy);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-primary:hover{background:var(--blue);}
+  .btn-primary:disabled{background:var(--muted);cursor:not-allowed;}
+  .btn-secondary{background:transparent;color:var(--navy);border:1.5px solid var(--border);padding:11px 22px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;}
+  .btn-secondary:hover{border-color:var(--navy);}
+  .btn-danger{background:#fef2f2;color:var(--red);border:1.5px solid #fecaca;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+  .btn-danger:hover{background:var(--red);color:white;}
+  .btn-amber{background:#fffbeb;color:#92400e;border:1.5px solid #fde68a;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+  .btn-amber:hover{background:#f59e0b;color:white;}
+  .btn-export{background:var(--gold);color:var(--navy);border:none;padding:9px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;}
+
+  /* ===== KPI ===== */
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+  .kpi-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px;border-top:3px solid var(--navy);}
+  .kpi-card.blue{border-top-color:var(--blue);}
+  .kpi-card.gold{border-top-color:var(--gold);}
+  .kpi-card.red{border-top-color:var(--red);}
+  .kpi-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .kpi-value{font-size:22px;font-weight:700;color:var(--navy);}
+  .kpi-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+
+  /* ===== FILTER ===== */
+  .filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+  .filter-bar select,.filter-bar input{width:auto;flex:1;min-width:140px;font-size:12px;padding:8px 12px;}
+  .search-box{flex:2;min-width:200px;}
+
+  /* ===== TABLE ===== */
+  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  thead{background:var(--navy);color:#fff;}
+  th{padding:10px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+  td{padding:10px 12px;border-bottom:1px solid var(--border);}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:var(--navy-light);}
+  tr.clickable{cursor:pointer;}
+  .amount{font-weight:600;color:var(--navy);}
+
+  /* ===== STATUS PILLS ===== */
+  .pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+  .p-new{background:#dbeafe;color:#1e40af;}
+  .p-prog{background:#fffbeb;color:#92400e;}
+  .p-done{background:#f0fdf4;color:#15803d;}
+  .p-rej{background:#fef2f2;color:#991b1b;}
+  .p-adj{background:var(--purple-l);color:var(--purple);}
+
+  .tranche-pill{display:inline-flex;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;}
+  .tr-t1{background:#dbeafe;color:#1e40af;}
+  .tr-t2{background:#dcfce7;color:#14532d;}
+  .tr-t3{background:#fef9c3;color:#854d0e;}
+  .tr-t4{background:#fee2e2;color:#991b1b;}
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state{text-align:center;padding:50px 20px;color:var(--muted);}
+  .empty-icon{font-size:34px;margin-bottom:10px;}
+  .empty-text{font-size:14px;font-weight:500;color:var(--text);margin-bottom:5px;}
+  .empty-sub{font-size:12px;}
+
+  /* ===== TOAST ===== */
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(100px);padding:12px 22px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:transform .3s;z-index:999;white-space:nowrap;color:#fff;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.success{background:var(--success);}
+  .toast.error{background:var(--red);}
+  .toast.info{background:var(--navy);}
+  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.8);display:none;align-items:center;justify-content:center;z-index:300;}
+  .loading-box{background:#fff;border-radius:12px;padding:24px 32px;box-shadow:0 8px 32px rgba(0,0,0,.12);text-align:center;}
+  .loading-spinner{width:32px;height:32px;border:3px solid var(--navy-light);border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
+
+  /* ===== CIRCUIT FRISE ===== */
+  .frise{display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
+  .frise-step{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid;white-space:nowrap;}
+  .frise-step.done{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}
+  .frise-step.active{background:var(--navy);color:white;border-color:var(--navy);}
+  .frise-step.wait{background:var(--bg);color:var(--muted);border-color:var(--border);}
+  .frise-step.notaire{background:var(--purple-l);color:var(--purple);border-color:#d8b4fe;}
+  .frise-arrow{color:var(--muted);font-size:13px;}
+
+  /* ===== MODAL ===== */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-start;justify-content:center;z-index:400;padding:20px;overflow-y:auto;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:white;border-radius:16px;width:100%;max-width:760px;margin:30px auto;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+  .modal-head{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .modal-head h3{font-size:16px;font-weight:700;color:var(--navy);}
+  .modal-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;line-height:1;}
+  .modal-close:hover{color:var(--red);}
+  .modal-body{padding:24px;}
+  .modal-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;}
+
+  /* ===== TABS in modal ===== */
+  .mtabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;overflow-x:auto;}
+  .mtab{padding:9px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+  .mtab.active{color:var(--navy);font-weight:600;border-bottom-color:var(--gold);}
+  .mtab-pane{display:none;}
+  .mtab-pane.active{display:block;}
+
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+  .detail-item-label{font-size:11px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;font-weight:600;letter-spacing:.4px;}
+  .detail-item-value{font-size:14px;font-weight:600;color:var(--text);}
+
+  .gtag{display:inline-flex;padding:3px 10px;border-radius:6px;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--muted);margin:2px 4px 2px 0;}
+
+  .alert{padding:11px 14px;border-radius:8px;font-size:12px;display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;line-height:1.5;}
+  .a-warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e;}
+  .a-info{background:var(--navy-light);border:1px solid #b5d4f4;color:var(--blue);}
+  .a-ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;}
+  .a-purple{background:var(--purple-l);border:1px solid #d8b4fe;color:var(--purple);}
+
+  /* ===== HISTORY ===== */
+  .hist-list{display:flex;flex-direction:column;}
+  .hist-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .hist-item:last-child{border-bottom:none;}
+  .hist-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .h-bl{background:var(--navy-light);} .h-gr{background:#f0fdf4;} .h-re{background:#fef2f2;}
+  .h-pu{background:var(--purple-l);} .h-am{background:#fffbeb;}
+  .hist-title{font-size:13px;font-weight:600;}
+  .hist-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+  .hist-mail{font-size:11px;color:var(--success);background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;padding:2px 8px;display:inline-flex;align-items:center;gap:4px;margin-top:5px;}
+
+  /* ===== FILES ===== */
+  .fdrop{border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;background:var(--bg);margin-bottom:12px;}
+  .fdrop:hover,.fdrop.drag{border-color:var(--blue);background:var(--navy-light);}
+  .fdrop p{font-size:13px;color:var(--muted);margin-top:8px;}
+  .flist{display:flex;flex-direction:column;gap:6px;}
+  .fitem{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:var(--bg);border:1px solid var(--border);border-radius:8px;}
+  .fil{display:flex;align-items:center;gap:9px;}
+  .fico{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--navy-light);}
+  .fname{font-size:13px;font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .fsize{font-size:11px;color:var(--muted);}
+  .fdel{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:2px 8px;border-radius:4px;}
+  .fdel:hover{background:#fef2f2;color:var(--red);}
+
+  /* ===== ANALYSE SECTIONS (accordéon) ===== */
+  .asec{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px;}
+  .ahead{padding:11px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+  .ahead h4{font-size:13px;font-weight:600;color:var(--navy);}
+  .abody{padding:16px;display:none;}
+  .abody.open{display:block;}
+  .agrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+  /* ===== USERS ===== */
+  .urow{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+  .urow:last-child{border-bottom:none;}
+  .uinfo{display:flex;align-items:center;gap:12px;}
+  .uav{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+  .uname{font-size:13.5px;font-weight:600;}
+  .umeta{font-size:11px;color:var(--muted);}
+  .role-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;}
+
+  @media(max-width:700px){
+    .form-grid{grid-template-columns:1fr;}
+    .kpi-row{grid-template-columns:1fr 1fr;}
+    .detail-grid{grid-template-columns:1fr;}
+    .agrid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="loading-spinner"></div>
+    <div style="font-size:13px;color:var(--navy);font-weight:500" id="loadingMsg">Chargement...</div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginPage" class="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="https://corismeso.finance/wp-content/uploads/2020/05/cropped-cropped-favicon3-270x270.png"
+        alt="CMF" onerror="this.style.display='none';document.getElementById('lf2').style.display='flex'">
+      <div class="login-logo-fallback" id="lf2" style="display:none">CM</div>
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--navy)">CréditTrack</div>
+        <div style="font-size:12px;color:var(--muted)">Coris Mésofinance CI — Circuit de validation</div>
+      </div>
+    </div>
+    <div class="login-title">Connexion</div>
+    <div class="login-sub">Accédez au suivi des dossiers de crédit</div>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-form">
+      <div class="form-group">
+        <label>Email professionnel</label>
+        <input type="email" id="loginEmail" placeholder="votre.email@coris-mesofinance.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="loginPwd" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">Se connecter</button>
+    </div>
+    <div class="login-footer">Coris Mésofinance Côte d'Ivoire — Direction Commerciale</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appPage" style="display:none">
+
+<header>
+  <div class="header-logo">
+    <img class="logo-img" src="https://corismeso.finance/wp-content/uploads/2020/05/cropped-cropped-favicon3-270x270.png"
+      alt="CMF" onerror="this.style.display='none';document.getElementById('lf').style.display='flex'">
+    <div class="logo-fallback" id="lf" style="display:none">CM</div>
+    <div class="header-info">
+      <div class="header-title">CréditTrack — Coris Mésofinance CI</div>
+      <div class="header-sub">Circuit de validation des dossiers de crédit</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-status"><span class="status-dot" id="statusDot"></span><span id="statusText">...</span></div>
+    <button class="nbtn" onclick="toggleNotifPanel()">🔔<span class="ndot" id="ndot"></span></button>
+    <div class="user-badge" onclick="document.getElementById('pwdModal').classList.add('open')">
+      <div class="user-badge-name" id="userBadgeName">—</div>
+      <div class="user-badge-role" id="userBadgeRole">—</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Déconnexion</button>
+  </div>
+</header>
+
+<div class="npanel" id="npanel">
+  <div class="nphead"><span>Notifications</span><button onclick="toggleNotifPanel()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px">✕</button></div>
+  <div id="npanelList"></div>
+</div>
+
+<div class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" onclick="showTab('dashboard',this)">📊 Tableau de bord</button>
+  <button class="nav-tab" onclick="showTab('dossiers',this)">📁 Dossiers</button>
+  <button class="nav-tab caf-only" onclick="showTab('nouveau',this)">➕ Nouveau dossier</button>
+  <button class="nav-tab" onclick="showTab('export',this)">⬇ Export</button>
+  <button class="nav-tab admin-only" onclick="showTab('users',this)">👥 Utilisateurs</button>
+  <button class="nav-tab" onclick="showTab('profil',this)">👤 Profil</button>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+    <div class="section-header">
+      <div class="section-title">📊 Tableau de bord</div>
+      <div class="section-desc">Vue d'ensemble des dossiers de crédit en cours</div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-label">Dossiers actifs</div><div class="kpi-value" id="kpi_actifs">—</div><div class="kpi-sub">en circuit</div></div>
+      <div class="kpi-card blue"><div class="kpi-label">Volume en cours</div><div class="kpi-value" id="kpi_volume">—</div><div class="kpi-sub">FCFA</div></div>
+      <div class="kpi-card gold"><div class="kpi-label">Décaissés ce mois</div><div class="kpi-value" id="kpi_decaisses">—</div><div class="kpi-sub">dossiers</div></div>
+      <div class="kpi-card red"><div class="kpi-label">Ajournés</div><div class="kpi-value" id="kpi_ajournes">—</div><div class="kpi-sub">en attente CA</div></div>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px">📋 Dossiers nécessitant votre action</div>
+      <div id="dash_action_list"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px">🕐 Derniers mouvements</div>
+      <div id="dash_recent_list"></div>
+    </div>
+  </div>
+
+  <!-- DOSSIERS -->
+  <div class="view" id="view-dossiers">
+    <div class="section-header">
+      <div class="section-title">📁 Dossiers de crédit</div>
+      <div class="section-desc">Liste complète des dossiers en circuit</div>
+    </div>
+    <div class="filter-bar">
+      <input type="text" id="dos_search" class="search-box" placeholder="🔍 Rechercher un client, un n° de dossier..." oninput="renderDossiers()">
+      <select id="dos_filter_statut" onchange="renderDossiers()">
+        <option value="">Tous les statuts</option>
+        <option value="new">Nouveau</option>
+        <option value="progress">En cours</option>
+        <option value="done">Décaissé</option>
+        <option value="rejected">Rejeté</option>
+        <option value="adjourned">Ajourné</option>
+      </select>
+      <select id="dos_filter_tranche" onchange="renderDossiers()">
+        <option value="">Toutes tranches</option>
+        <option value="t1">T1 — ≤ 2M</option>
+        <option value="t2">T2 — 2-5M</option>
+        <option value="t3">T3 — 5-50M</option>
+        <option value="t4">T4 — &gt; 50M</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>N° Dossier</th><th>Client</th><th>CA</th><th>Montant</th><th>Tranche</th><th>Étape actuelle</th><th>Statut</th><th>Date</th></tr></thead>
+        <tbody id="dossiers_table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- NOUVEAU DOSSIER -->
+  <div class="view" id="view-nouveau">
+    <div class="section-header">
+      <div class="section-title">➕ Nouveau dossier de crédit</div>
+      <div class="section-desc">Le circuit de validation est déterminé automatiquement selon le montant</div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)">Informations client</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="required">Client</label><input type="text" id="nf_client" placeholder="Nom ou raison sociale"></div>
+        <div class="form-group"><label class="required">Chargé d'affaires</label><select id="nf_ca"><option value="">Sélectionner...</option></select></div>
+        <div class="form-group"><label class="required">Montant (FCFA)</label><input type="number" id="nf_montant" min="0" oninput="onMontantChange()"></div>
+        <div class="form-group"><label class="required">Objet du crédit</label><input type="text" id="nf_objet" placeholder="Ex: Fonds de roulement"></div>
+        <div class="form-group"><label>Durée (mois)</label><input type="number" id="nf_duree" placeholder="24" min="1"></div>
+        <div class="form-group"><label>Tranche détectée</label><div class="tranche-box" id="nf_tranche_disp">Saisir un montant...</div></div>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--border)">Garanties</div>
+      <div class="checkbox-grid">
+        <label class="checkbox-label"><input type="checkbox" class="garantie-chk" value="aval_salarie"> Aval salarié</label>
+        <label class="checkbox-label"><input type="checkbox" class="garantie-chk" value="aval_commercant"> Aval commerçant</label>
+        <label class="checkbox-label"><input type="checkbox" class="garantie-chk" value="co_emprunteur"> Co-emprunteur</label>
+        <label class="checkbox-label"><input type="checkbox" class="garantie-chk" value="gage_vehicule"> Gage véhicule</label>
+        <label class="checkbox-label"><input type="checkbox" class="garantie-chk" value="nantissement_materiel"> Nantissement matériel professionnel</label>
+        <label class="checkbox-label"><input type="checkbox" class="garantie-chk" value="gage_dat"> Gage DAT</label>
+        <label class="checkbox-label"><input type="checkbox" class="garantie-chk" value="hypotheque" onchange="onHypothequeChange()"> Hypothèque</label>
+      </div>
+      <div id="hypo_alert" style="display:none;margin-top:12px">
+        <div class="alert a-purple">⚖️ Passage chez le notaire requis — la Responsable Juridique sera notifiée à l'étape Engagements.</div>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--border)">Circuit de validation (aperçu)</div>
+      <div id="nf_circuit_preview"><div style="color:var(--muted);font-size:13px">Saisir un montant pour voir le circuit applicable.</div></div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--border)">Pièces jointes</div>
+      <div class="fdrop" id="nf_drop" onclick="document.getElementById('nf_file_input').click()">
+        <span style="font-size:26px">📎</span>
+        <p>Glissez ou cliquez pour ajouter des fichiers<br><small>PDF, Word, Excel, Images</small></p>
+      </div>
+      <input type="file" id="nf_file_input" multiple style="display:none">
+      <div class="flist" id="nf_files_list"></div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn-secondary" onclick="showTab('dossiers',document.querySelector('.nav-tab[onclick*=dossiers]'))">Annuler</button>
+        <button class="btn-primary" id="btn_create_dossier" onclick="createDossier()">✅ Créer le dossier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT -->
+  <div class="view" id="view-export">
+    <div class="section-header">
+      <div class="section-title">⬇ Export des dossiers</div>
+      <div class="section-desc">Exporter la liste des dossiers en CSV (compatible Excel)</div>
+    </div>
+    <div class="card">
+      <div class="filter-bar">
+        <select id="exp_ca"><option value="">Tous les CA</option></select>
+        <select id="exp_statut">
+          <option value="">Tous les statuts</option>
+          <option value="new">Nouveau</option>
+          <option value="progress">En cours</option>
+          <option value="done">Décaissé</option>
+          <option value="rejected">Rejeté</option>
+          <option value="adjourned">Ajourné</option>
+        </select>
+        <button class="btn-primary" onclick="exportCSV()">⬇ Télécharger CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="view" id="view-users">
+    <div class="section-header">
+      <div class="section-title">👥 Gestion des accès</div>
+      <div class="section-desc">Créer ou désactiver des comptes utilisateurs</div>
+    </div>
+    <div class="card" style="max-width:560px">
+      <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px">➕ Créer un compte</div>
+      <div class="form-group" style="margin-bottom:12px"><label class="required">Nom complet</label><input type="text" id="nu_nom" placeholder="NOM Prénom"></div>
+      <div class="form-group" style="margin-bottom:12px"><label class="required">Email professionnel</label><input type="email" id="nu_email" placeholder="prenom.nom@coris-mesofinance.com"></div>
+      <div class="form-group" style="margin-bottom:12px"><label class="required">Mot de passe initial</label><input type="text" id="nu_pwd" value="Coris@2026"></div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="required">Rôle</label>
+        <select id="nu_role">
+          <option value="ca">Chargé d'affaires</option>
+          <option value="chef_agence">Chef d'agence</option>
+          <option value="resp_commercial">Responsable commercial</option>
+          <option value="dir_exploitation">Directeur d'exploitation</option>
+          <option value="analyste_risque">Analyste risque</option>
+          <option value="resp_risque">Responsable risque</option>
+          <option value="dg">Directeur Général</option>
+          <option value="comite">Comité supérieur crédit</option>
+          <option value="engagements">Engagements</option>
+          <option value="juridique">Responsable Juridique</option>
+          <option value="admin">Administrateur</option>
+        </select>
+      </div>
+      <button class="btn-primary" style="width:100%" onclick="createUser()">➕ Créer le compte</button>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px">👤 Comptes actifs</div>
+      <div id="users_list"></div>
+    </div>
+  </div>
+
+  <!-- PROFIL -->
+  <div class="view" id="view-profil">
+    <div class="section-header">
+      <div class="section-title">👤 Mon profil</div>
+    </div>
+    <div class="card" style="max-width:560px">
+      <div class="form-group" style="margin-bottom:14px"><label>Nom complet</label><input type="text" id="pf_nom" disabled></div>
+      <div class="form-group" style="margin-bottom:14px"><label>Email</label><input type="text" id="pf_email" disabled></div>
+      <div class="form-group" style="margin-bottom:14px"><label>Rôle</label><input type="text" id="pf_role" disabled></div>
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--border)">Sécurité</div>
+      <button class="btn-secondary" onclick="document.getElementById('pwdModal').classList.add('open')">🔐 Changer mon mot de passe</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /appPage -->
+
+<!-- MODAL DETAIL DOSSIER -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="dm_title">Dossier</h3>
+      <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mtabs">
+        <div class="mtab active" onclick="switchMTab('infos',this)">📋 Informations</div>
+        <div class="mtab" onclick="switchMTab('analyse',this)">📊 Analyse crédit</div>
+        <div class="mtab" onclick="switchMTab('pj',this)">📎 Pièces jointes</div>
+        <div class="mtab" onclick="switchMTab('histo',this)">🕐 Historique</div>
+      </div>
+
+      <div class="mtab-pane active" id="mtab-infos">
+        <div class="detail-grid" id="dm_infos_grid"></div>
+        <div style="margin-bottom:14px"><div class="detail-item-label">Garanties</div><div id="dm_garanties"></div></div>
+        <div id="dm_notaire_box"></div>
+        <div id="dm_adj_box"></div>
+        <div class="detail-item-label" style="margin-bottom:8px">Circuit de validation</div>
+        <div id="dm_circuit" class="frise"></div>
+      </div>
+
+      <div class="mtab-pane" id="mtab-analyse">
+        <div class="alert a-info">📊 Fiche d'analyse — à compléter par le département Risques ou le chargé d'affaires selon la tranche.</div>
+        <div class="asec">
+          <div class="ahead" onclick="toggleAccordion('acc-client')"><h4>1. Présentation du client</h4><span id="icon-acc-client">▼</span></div>
+          <div class="abody" id="acc-client">
+            <div class="agrid">
+              <div class="form-group"><label>Activité</label><input type="text" id="an_activite"></div>
+              <div class="form-group"><label>Ancienneté activité</label><input type="text" id="an_anciennete" placeholder="ex: 5 ans"></div>
+              <div class="form-group"><label>Situation familiale</label><input type="text" id="an_situation"></div>
+            </div>
+          </div>
+        </div>
+        <div class="asec">
+          <div class="ahead" onclick="toggleAccordion('acc-fin')"><h4>2. Analyse financière</h4><span id="icon-acc-fin">▼</span></div>
+          <div class="abody" id="acc-fin">
+            <div class="agrid">
+              <div class="form-group"><label>Chiffre d'affaires mensuel</label><input type="number" id="an_ca_mensuel"></div>
+              <div class="form-group"><label>Charges mensuelles</label><input type="number" id="an_charges"></div>
+              <div class="form-group"><label>Capacité de remboursement</label><input type="number" id="an_capacite"></div>
+            </div>
+          </div>
+        </div>
+        <div class="asec">
+          <div class="ahead" onclick="toggleAccordion('acc-risque')"><h4>3. Évaluation du risque</h4><span id="icon-acc-risque">▼</span></div>
+          <div class="abody" id="acc-risque">
+            <div class="agrid">
+              <div class="form-group"><label>Note risque</label>
+                <select id="an_note"><option value="">—</option><option>A — Très faible risque</option><option>B — Faible risque</option><option>C — Risque modéré</option><option>D — Risque élevé</option></select>
+              </div>
+              <div class="form-group"><label>Avis</label>
+                <select id="an_avis"><option value="">—</option><option>✅ Favorable</option><option>⚠️ Favorable sous réserve</option><option>❌ Défavorable</option></select>
+              </div>
+              <div class="form-group"><label>Montant recommandé</label><input type="number" id="an_mrec"></div>
+            </div>
+            <div class="form-group full" style="margin-top:10px"><label>Commentaire</label><textarea id="an_commentaire"></textarea></div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="saveAnalyse()" style="margin-top:8px">💾 Enregistrer l'analyse</button>
+      </div>
+
+      <div class="mtab-pane" id="mtab-pj">
+        <div class="fdrop" id="dm_drop" onclick="document.getElementById('dm_file_input').click()">
+          <span style="font-size:26px">📎</span>
+          <p>Glissez ou cliquez pour ajouter des fichiers</p>
+        </div>
+        <input type="file" id="dm_file_input" multiple style="display:none">
+        <div class="flist" id="dm_files_list"></div>
+      </div>
+
+      <div class="mtab-pane" id="mtab-histo">
+        <div class="hist-list" id="dm_history"></div>
+      </div>
+    </div>
+    <div class="modal-foot" id="dm_actions"></div>
+  </div>
+</div>
+
+<!-- MODAL AJOURNEMENT -->
+<div class="modal-overlay" id="adjModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head"><h3>⏸ Ajourner le dossier</h3><button class="modal-close" onclick="closeModal('adjModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="required">Motif</label>
+        <select id="adj_motif">
+          <option value="">Sélectionner...</option>
+          <option>Documents manquants</option>
+          <option>Garantie insuffisante</option>
+          <option>Capacité de remboursement à revoir</option>
+          <option>Informations complémentaires requises</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="required">Précisions</label><textarea id="adj_commentaire" placeholder="Détailler les éléments à apporter par le CA..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeModal('adjModal')">Annuler</button>
+      <button class="btn-amber" onclick="confirmAjournement()">⏸ Confirmer l'ajournement</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REPRÉSENTER (CA) -->
+<div class="modal-overlay" id="repModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head"><h3>↩️ Représenter le dossier</h3><button class="modal-close" onclick="closeModal('repModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="alert a-info" id="rep_motif_display" style="margin-bottom:14px"></div>
+      <div class="form-group"><label>Éléments apportés</label><textarea id="rep_commentaire" placeholder="Décrire les corrections apportées..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeModal('repModal')">Annuler</button>
+      <button class="btn-primary" onclick="confirmRepresenter()">↩️ Représenter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHANGEMENT MDP -->
+<div class="modal-overlay" id="pwdModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head"><h3>🔐 Changer mon mot de passe</h3><button class="modal-close" onclick="closeModal('pwdModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px"><label>Nouveau mot de passe</label><input type="password" id="newPwdInput" placeholder="Minimum 6 caractères"></div>
+      <div class="form-group"><label>Confirmer</label><input type="password" id="confirmPwdInput"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeModal('pwdModal')">Annuler</button>
+      <button class="btn-primary" onclick="changePassword()">✅ Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+// ════════════════════════════════════════════════════════
+// CRÉDITTRACK — CORIS MÉSOFINANCE CI
+// ════════════════════════════════════════════════════════
+
+const SB_URL = "https://sjwkqrvmjivykinatkpf.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqd2txcnZtaml2eWtpbmF0a3BmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MDg1NzgsImV4cCI6MjA5ODM4NDU3OH0.qSZrSJGiLNI4xGHRVjOAp9RT2y9VTxWZvX8yZ594zoE";
+const EMAILJS_PUBLIC_KEY = "1TtAEtaW_g57xPrG_";
+const EMAILJS_SERVICE_ID = "service_vcv1p5f";
+const EMAILJS_TEMPLATE_ID = "template_lin0fjo";
+
+// Initialiser EmailJS
+if (typeof emailjs !== "undefined") {
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+}
+
+// ====== CIRCUITS DE VALIDATION ======
+const CIRCUITS = {
+  t1: { label: "≤ 2 000 000 FCFA", max: 2000000,
+        steps: ["Chargé d'affaires","Chef d'agence","Responsable commercial","Directeur d'exploitation","DG","Engagements"],
+        roles: ["ca","chef_agence","resp_commercial","dir_exploitation","dg","engagements"] },
+  t2: { label: "2 000 001 – 5 000 000 FCFA", max: 5000000,
+        steps: ["Chargé d'affaires","Chef d'agence","Directeur d'exploitation","DG","Engagements"],
+        roles: ["ca","chef_agence","dir_exploitation","dg","engagements"] },
+  t3: { label: "5 000 001 – 50 000 000 FCFA", max: 50000000,
+        steps: ["Chargé d'affaires","Chef d'agence","Directeur d'exploitation","Analyste risque","Responsable risque","DG","Engagements"],
+        roles: ["ca","chef_agence","dir_exploitation","analyste_risque","resp_risque","dg","engagements"] },
+  t4: { label: "> 50 000 000 FCFA", max: null,
+        steps: ["Chargé d'affaires","Chef d'agence","Directeur d'exploitation","Analyste risque","Responsable risque","DG","Comité supérieur crédit","Engagements"],
+        roles: ["ca","chef_agence","dir_exploitation","analyste_risque","resp_risque","dg","comite","engagements"] }
+};
+
+const ROLES = {
+  ca: { label: "Chargé d'affaires", color: "#1e40af", bg: "#dbeafe" },
+  chef_agence: { label: "Chef d'agence", color: "#0c4a6e", bg: "#e0f2fe" },
+  resp_commercial: { label: "Resp. commercial", color: "#15803d", bg: "#f0fdf4" },
+  dir_exploitation: { label: "Dir. exploitation", color: "#92400e", bg: "#fffbeb" },
+  analyste_risque: { label: "Analyste risque", color: "#9d174d", bg: "#fce7f3" },
+  resp_risque: { label: "Resp. risque", color: "#7c2d12", bg: "#fef3c7" },
+  dg: { label: "Directeur Général", color: "#581c87", bg: "#f3e8ff" },
+  comite: { label: "Comité sup. crédit", color: "#991b1b", bg: "#fee2e2" },
+  engagements: { label: "Engagements", color: "#065f46", bg: "#d1fae5" },
+  juridique: { label: "Resp. Juridique", color: "#6b21a8", bg: "#f3e8ff" },
+  admin: { label: "Administrateur", color: "#1A3A7A", bg: "#e8eef7" }
+};
+
+const GARANTIE_LABELS = {
+  aval_salarie: "Aval salarié",
+  aval_commercant: "Aval commerçant",
+  co_emprunteur: "Co-emprunteur",
+  gage_vehicule: "Gage véhicule",
+  nantissement_materiel: "Nantissement matériel professionnel",
+  gage_dat: "Gage DAT",
+  hypotheque: "Hypothèque"
+};
+
+// ====== STATE ======
+let currentUser = null;
+let currentSession = null;
+let currentRole = null;
+let dossiers = [];
+let users = [];
+let notifications = [];
+let currentDossierIdx = null;
+let newFiles = [];
+let detailFiles = [];
+
+// ════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════
+async function sbAuth(email, password) {
+  const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: { "apikey": SB_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  return r.json();
+}
+
+async function sbSignOut(token) {
+  await fetch(`${SB_URL}/auth/v1/logout`, {
+    method: "POST",
+    headers: { "apikey": SB_KEY, "Authorization": "Bearer " + token }
+  });
+}
+
+async function getProfile(userId, token) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/ct_profiles?id=eq.${userId}&select=*`, {
+      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + token }
+    });
+    if (!r.ok) return null;
+    const data = await r.json();
+    return Array.isArray(data) && data.length ? data[0] : null;
+  } catch (e) { return null; }
+}
+
+async function doLogin() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const pwd = document.getElementById("loginPwd").value;
+  const errEl = document.getElementById("loginError");
+  const btn = document.getElementById("loginBtn");
+
+  if (!email || !pwd) {
+    errEl.textContent = "Veuillez renseigner votre email et mot de passe.";
+    errEl.style.display = "block"; return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Connexion...';
+  errEl.style.display = "none";
+
+  try {
+    const data = await sbAuth(email, pwd);
+    if (data.error) throw new Error(data.error_description || data.error);
+    if (!data.access_token) throw new Error("Échec de connexion. Vérifiez vos identifiants.");
+
+    currentSession = data.access_token;
+    await new Promise(r => setTimeout(r, 400));
+    const profile = await getProfile(data.user.id, currentSession);
+
+    if (!profile) throw new Error("Profil introuvable. Contactez l'administrateur.");
+    if (profile.actif === false) throw new Error("Compte désactivé. Contactez l'administrateur.");
+
+    currentUser = profile;
+    currentRole = profile.role;
+    sessionStorage.setItem("ct_session", JSON.stringify({ token: currentSession, user: profile }));
+    showApp();
+  } catch (e) {
+    errEl.textContent = "Erreur : " + e.message;
+    errEl.style.display = "block";
+  }
+  btn.disabled = false;
+  btn.innerHTML = "Se connecter";
+}
+
+async function doLogout() {
+  if (currentSession) await sbSignOut(currentSession);
+  sessionStorage.removeItem("ct_session");
+  currentUser = null; currentSession = null; currentRole = null;
+  document.getElementById("appPage").style.display = "none";
+  document.getElementById("loginPage").style.display = "flex";
+}
+
+function showApp() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("appPage").style.display = "block";
+  document.getElementById("userBadgeName").textContent = currentUser.nom || currentUser.email;
+  document.getElementById("userBadgeRole").textContent = (ROLES[currentRole] || {}).label || currentRole;
+
+  const isAdmin = currentRole === "admin";
+  const isCA = currentRole === "ca";
+  document.querySelectorAll(".admin-only").forEach(el => el.style.display = isAdmin ? "" : "none");
+  document.querySelectorAll(".caf-only").forEach(el => el.style.display = isCA ? "" : "none");
+
+  loadAllData();
+}
+
+// ════════════════════════════════════════════════════════
+// SUPABASE DATA
+// ════════════════════════════════════════════════════════
+async function sbGet(table, query = "") {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?select=*${query}`, {
+    headers: { "apikey": SB_KEY, "Authorization": "Bearer " + (currentSession || SB_KEY) }
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function sbInsert(table, row) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: "POST",
+    headers: { "apikey": SB_KEY, "Authorization": "Bearer " + (currentSession || SB_KEY), "Content-Type": "application/json", "Prefer": "return=representation" },
+    body: JSON.stringify(row)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  const data = await r.json();
+  return Array.isArray(data) ? data[0] : data;
+}
+
+async function sbUpdate(table, id, patch) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: "PATCH",
+    headers: { "apikey": SB_KEY, "Authorization": "Bearer " + (currentSession || SB_KEY), "Content-Type": "application/json", "Prefer": "return=minimal" },
+    body: JSON.stringify(patch)
+  });
+  if (!r.ok) throw new Error(await r.text());
+}
+
+async function loadAllData() {
+  showLoad(true, "Chargement des dossiers...");
+  try {
+    const [dRes, uRes] = await Promise.all([
+      sbGet("ct_dossiers", "&order=created_at.desc"),
+      sbGet("ct_profiles", "&order=nom.asc")
+    ]);
+    dossiers = dRes.map(d => ({ ...d, garanties: d.garanties || [], history: d.history || [], files: d.files || [], analyse_credit: d.analyse_credit || {} }));
+    users = uRes;
+    setStatus(true);
+    populateSelects();
+    renderDashboard();
+    renderDossiers();
+    buildNotifications();
+  } catch (e) {
+    setStatus(false);
+    toast("Erreur de connexion à la base", "error");
+  }
+  showLoad(false);
+}
+
+function populateSelects() {
+  const caUsers = users.filter(u => u.role === "ca" && u.actif);
+  const opts = caUsers.map(u => `<option value="${u.nom}">${u.nom}</option>`).join("");
+  ["nf_ca", "exp_ca"].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const firstOpt = sel.options[0];
+    sel.innerHTML = "";
+    sel.appendChild(firstOpt);
+    sel.insertAdjacentHTML("beforeend", opts);
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════
+function fmt(n) { return n ? Number(n).toLocaleString("fr-FR") : "—"; }
+function fmtM(n) { if (!n) return "—"; const m = n / 1e6; return m >= 1 ? m.toFixed(1) + " M" : (n / 1000).toFixed(0) + " K"; }
+function fmtD(s) { if (!s) return "—"; const d = s.split("T")[0].split("-"); return `${d[2]}/${d[1]}/${d[0]}`; }
+function fmtDT(s) { if (!s) return "—"; const dt = new Date(s); return dt.toLocaleDateString("fr-FR") + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }); }
+
+function toast(msg, type = "success") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast " + type + " show";
+  setTimeout(() => t.className = "toast", 3200);
+}
+function showLoad(v, msg = "") {
+  document.getElementById("loadingOverlay").style.display = v ? "flex" : "none";
+  if (msg) document.getElementById("loadingMsg").textContent = msg;
+}
+function setStatus(ok) {
+  document.getElementById("statusDot").style.background = ok ? "#22c55e" : "#ef4444";
+  document.getElementById("statusText").textContent = ok ? "En ligne" : "Hors ligne";
+}
+
+function getTranche(montant) {
+  if (montant <= 2000000) return "t1";
+  if (montant <= 5000000) return "t2";
+  if (montant <= 50000000) return "t3";
+  return "t4";
+}
+
+function getStatutPill(statut) {
+  const map = {
+    new: { l: "Nouveau", c: "p-new" },
+    progress: { l: "En cours", c: "p-prog" },
+    done: { l: "Décaissé", c: "p-done" },
+    rejected: { l: "Rejeté", c: "p-rej" },
+    adjourned: { l: "Ajourné", c: "p-adj" }
+  };
+  const s = map[statut] || map.new;
+  return `<span class="pill ${s.c}">${s.l}</span>`;
+}
+
+function genDossierId() {
+  const num = dossiers.length + 1;
+  return "DOS-" + String(num).padStart(4, "0");
+}
+
+// ════════════════════════════════════════════════════════
+// TABS / NAVIGATION
+// ════════════════════════════════════════════════════════
+function showTab(name, el) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("view-" + name).classList.add("active");
+  el.classList.add("active");
+  closeNotifPanel();
+  if (name === "dashboard") renderDashboard();
+  if (name === "dossiers") renderDossiers();
+  if (name === "users") renderUsers();
+  if (name === "profil") loadProfilView();
+  if (name === "nouveau") resetNewForm();
+}
+
+function loadProfilView() {
+  document.getElementById("pf_nom").value = currentUser.nom || "";
+  document.getElementById("pf_email").value = currentUser.email || "";
+  document.getElementById("pf_role").value = (ROLES[currentRole] || {}).label || currentRole;
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+function openModal(id) { document.getElementById(id).classList.add("open"); }
+
+// ════════════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════════════
+function renderDashboard() {
+  const actifs = dossiers.filter(d => d.statut === "progress" || d.statut === "new" || d.statut === "adjourned");
+  const volume = actifs.reduce((s, d) => s + (d.montant || 0), 0);
+  const thisMonth = new Date().toISOString().substring(0, 7);
+  const decaisses = dossiers.filter(d => d.statut === "done" && d.date && d.date.startsWith(thisMonth));
+  const ajournes = dossiers.filter(d => d.statut === "adjourned");
+
+  document.getElementById("kpi_actifs").textContent = actifs.length;
+  document.getElementById("kpi_volume").textContent = fmtM(volume);
+  document.getElementById("kpi_decaisses").textContent = decaisses.length;
+  document.getElementById("kpi_ajournes").textContent = ajournes.length;
+
+  // Dossiers nécessitant action de l'utilisateur courant
+  const actionDossiers = dossiers.filter(d => {
+    if (d.statut === "done" || d.statut === "rejected") return false;
+    const circuit = CIRCUITS[d.tranche];
+    if (!circuit) return false;
+    if (d.statut === "adjourned") return currentRole === "ca" && d.ca === currentUser.nom;
+    const currentStepRole = circuit.roles[d.etape_idx];
+    return currentStepRole === currentRole;
+  });
+
+  const actionContainer = document.getElementById("dash_action_list");
+  if (!actionDossiers.length) {
+    actionContainer.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">Aucun dossier en attente de votre action</div></div>`;
+  } else {
+    actionContainer.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>N°</th><th>Client</th><th>CA</th><th>Montant</th><th>Statut</th><th></th></tr></thead>
+      <tbody>${actionDossiers.map(d => {
+        const idx = dossiers.indexOf(d);
+        return `<tr class="clickable" onclick="openDetail(${idx})">
+          <td style="font-weight:700;color:var(--navy)">${d.dossier_id}</td>
+          <td><strong>${d.client}</strong></td>
+          <td style="font-size:11px">${d.ca}</td>
+          <td class="amount">${fmtM(d.montant)}</td>
+          <td>${getStatutPill(d.statut)}</td>
+          <td><button class="btn-secondary" style="padding:5px 12px;font-size:11px" onclick="event.stopPropagation();openDetail(${idx})">Ouvrir →</button></td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table></div>`;
+  }
+
+  // Derniers mouvements
+  const allHistory = [];
+  dossiers.forEach((d, idx) => {
+    (d.history || []).forEach(h => allHistory.push({ ...h, dossierId: d.dossier_id, idx, client: d.client }));
+  });
+  allHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const recent = allHistory.slice(0, 8);
+
+  const recentContainer = document.getElementById("dash_recent_list");
+  if (!recent.length) {
+    recentContainer.innerHTML = `<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">Aucun mouvement récent</div></div>`;
+  } else {
+    recentContainer.innerHTML = `<div class="hist-list">${recent.map(h => `
+      <div class="hist-item">
+        <div class="hist-dot ${h.cls || 'h-bl'}">${h.icon || '📝'}</div>
+        <div>
+          <div class="hist-title">${h.label} — <span style="color:var(--navy);cursor:pointer" onclick="openDetail(${h.idx})">${h.dossierId}</span></div>
+          <div class="hist-meta">${h.client} · Par ${h.user} · ${fmtD(h.date)}</div>
+        </div>
+      </div>`).join("")}</div>`;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// DOSSIERS LIST
+// ════════════════════════════════════════════════════════
+function getVisibleDossiers() {
+  if (currentRole === "ca") {
+    return dossiers.filter(d => d.ca === currentUser.nom);
+  }
+  return dossiers;
+}
+
+function renderDossiers() {
+  const search = (document.getElementById("dos_search")?.value || "").toLowerCase();
+  const filterStatut = document.getElementById("dos_filter_statut")?.value || "";
+  const filterTranche = document.getElementById("dos_filter_tranche")?.value || "";
+
+  let list = getVisibleDossiers();
+  if (search) list = list.filter(d => d.client.toLowerCase().includes(search) || d.dossier_id.toLowerCase().includes(search));
+  if (filterStatut) list = list.filter(d => d.statut === filterStatut);
+  if (filterTranche) list = list.filter(d => d.tranche === filterTranche);
+
+  const tbody = document.getElementById("dossiers_table");
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📁</div><div class="empty-text">Aucun dossier</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(d => {
+    const idx = dossiers.indexOf(d);
+    const circuit = CIRCUITS[d.tranche];
+    const currentStep = circuit ? circuit.steps[d.etape_idx] : "—";
+    return `<tr class="clickable" onclick="openDetail(${idx})">
+      <td style="font-weight:700;color:var(--navy)">${d.dossier_id}</td>
+      <td><strong>${d.client}</strong></td>
+      <td style="font-size:11px">${d.ca}</td>
+      <td class="amount">${fmt(d.montant)}</td>
+      <td><span class="tranche-pill tr-${d.tranche}">${d.tranche.toUpperCase()}</span></td>
+      <td style="font-size:11px">${d.statut === 'done' ? 'Terminé' : (d.statut === 'rejected' ? '—' : currentStep)}</td>
+      <td>${getStatutPill(d.statut)}</td>
+      <td style="font-size:11px">${fmtD(d.date)}</td>
+    </tr>`;
+  }).join("");
+}
+
+// ════════════════════════════════════════════════════════
+// CRÉATION DOSSIER
+// ════════════════════════════════════════════════════════
+function onMontantChange() {
+  const m = parseInt(document.getElementById("nf_montant").value) || 0;
+  const t = getTranche(m);
+  const disp = document.getElementById("nf_tranche_disp");
+  if (m > 0) {
+    disp.textContent = CIRCUITS[t].label;
+    disp.classList.add("active");
+    renderCircuitPreview(t);
+  } else {
+    disp.textContent = "Saisir un montant...";
+    disp.classList.remove("active");
+    document.getElementById("nf_circuit_preview").innerHTML = `<div style="color:var(--muted);font-size:13px">Saisir un montant pour voir le circuit applicable.</div>`;
+  }
+}
+
+function onHypothequeChange() {
+  const checked = document.querySelector('.garantie-chk[value="hypotheque"]').checked;
+  document.getElementById("hypo_alert").style.display = checked ? "block" : "none";
+}
+
+function renderCircuitPreview(tranche) {
+  const circuit = CIRCUITS[tranche];
+  const hasHypo = document.querySelector('.garantie-chk[value="hypotheque"]')?.checked;
+  let html = '<div class="frise">';
+  circuit.steps.forEach((step, i) => {
+    html += `<span class="frise-step wait">${step}</span>`;
+    if (i < circuit.steps.length - 1) html += '<span class="frise-arrow">→</span>';
+  });
+  if (hasHypo) {
+    html += '<span class="frise-arrow">→</span><span class="frise-step notaire">⚖️ Notaire</span>';
+  }
+  html += '</div>';
+  document.getElementById("nf_circuit_preview").innerHTML = html;
+}
+
+function resetNewForm() {
+  ["nf_client", "nf_montant", "nf_objet", "nf_duree"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("nf_ca").selectedIndex = 0;
+  document.querySelectorAll(".garantie-chk").forEach(c => c.checked = false);
+  document.getElementById("hypo_alert").style.display = "none";
+  document.getElementById("nf_tranche_disp").textContent = "Saisir un montant...";
+  document.getElementById("nf_tranche_disp").classList.remove("active");
+  document.getElementById("nf_circuit_preview").innerHTML = `<div style="color:var(--muted);font-size:13px">Saisir un montant pour voir le circuit applicable.</div>`;
+  newFiles = [];
+  renderFilesList("nf_files_list", newFiles, true);
+}
+
+async function createDossier() {
+  const client = document.getElementById("nf_client").value.trim();
+  const ca = document.getElementById("nf_ca").value;
+  const montant = parseInt(document.getElementById("nf_montant").value) || 0;
+  const objet = document.getElementById("nf_objet").value.trim();
+  const duree = parseInt(document.getElementById("nf_duree").value) || 12;
+
+  if (!client || !ca || !montant || !objet) { toast("Champs obligatoires manquants", "error"); return; }
+
+  const garanties = Array.from(document.querySelectorAll(".garantie-chk:checked")).map(c => c.value);
+  const notaire = garanties.includes("hypotheque");
+  const tranche = getTranche(montant);
+  const id = genDossierId();
+
+  const btn = document.getElementById("btn_create_dossier");
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Création...';
+
+  const row = {
+    dossier_id: id, client, ca, montant, objet, duree, tranche, garanties, notaire,
+    etape_idx: 0, statut: "new", date: new Date().toISOString().split("T")[0],
+    files: [...newFiles], analyse_credit: {},
+    history: [{ t: "create", label: "Dossier créé", user: currentUser.nom, icon: "📝", cls: "h-bl", date: new Date().toISOString() }]
+  };
+
+  try {
+    const created = await sbInsert("ct_dossiers", row);
+    dossiers.unshift({ ...created, garanties: created.garanties || [], history: created.history || [], files: created.files || [], analyse_credit: created.analyse_credit || {} });
+
+    // Notifier le premier acteur du circuit (chef d'agence)
+    await notifyNextActor(dossiers[0], CIRCUITS[tranche].roles[0]);
+
+    resetNewForm();
+    showTab("dossiers", document.querySelector(".nav-tab[onclick*=dossiers]"));
+    renderDashboard(); renderDossiers();
+    toast(id + " créé avec succès", "success");
+  } catch (e) {
+    toast("Erreur création : " + e.message, "error");
+  }
+  btn.disabled = false; btn.innerHTML = "✅ Créer le dossier";
+}
+
+// ════════════════════════════════════════════════════════
+// DÉTAIL DOSSIER / MODAL
+// ════════════════════════════════════════════════════════
+function openDetail(idx) {
+  currentDossierIdx = idx;
+  const d = dossiers[idx];
+  document.getElementById("dm_title").textContent = `${d.dossier_id} — ${d.client}`;
+
+  // Infos
+  document.getElementById("dm_infos_grid").innerHTML = `
+    <div><div class="detail-item-label">Client</div><div class="detail-item-value">${d.client}</div></div>
+    <div><div class="detail-item-label">Chargé d'affaires</div><div class="detail-item-value">${d.ca}</div></div>
+    <div><div class="detail-item-label">Montant</div><div class="detail-item-value">${fmt(d.montant)} FCFA</div></div>
+    <div><div class="detail-item-label">Tranche</div><div class="detail-item-value"><span class="tranche-pill tr-${d.tranche}">${CIRCUITS[d.tranche].label}</span></div></div>
+    <div><div class="detail-item-label">Objet</div><div class="detail-item-value">${d.objet}</div></div>
+    <div><div class="detail-item-label">Durée</div><div class="detail-item-value">${d.duree} mois</div></div>
+    <div><div class="detail-item-label">Statut</div><div class="detail-item-value">${getStatutPill(d.statut)}</div></div>
+    <div><div class="detail-item-label">Date création</div><div class="detail-item-value">${fmtD(d.date)}</div></div>
+  `;
+
+  document.getElementById("dm_garanties").innerHTML = (d.garanties || []).length
+    ? d.garanties.map(g => `<span class="gtag">${GARANTIE_LABELS[g] || g}</span>`).join("")
+    : '<span style="color:var(--muted);font-size:12px">Aucune garantie renseignée</span>';
+
+  document.getElementById("dm_notaire_box").innerHTML = d.notaire
+    ? `<div class="alert a-purple">⚖️ Passage notaire requis — Responsable Juridique impliquée à l'étape Engagements</div>` : "";
+
+  if (d.statut === "adjourned") {
+    document.getElementById("dm_adj_box").innerHTML = `
+      <div class="alert a-warn">
+        ⏸ <div><strong>Ajourné par ${d.adj_by}</strong><br>Motif : ${d.adj_motif}<br>${d.adj_com}</div>
+      </div>`;
+  } else {
+    document.getElementById("dm_adj_box").innerHTML = "";
+  }
+
+  renderCircuitFrise(d);
+  renderAnalyseForm(d);
+  detailFiles = [...(d.files || [])];
+  renderFilesList("dm_files_list", detailFiles, false);
+  renderHistory(d);
+  renderModalActions(d);
+
+  switchMTab("infos", document.querySelector(".mtab"));
+  openModal("detailModal");
+}
+
+function renderCircuitFrise(d) {
+  const circuit = CIRCUITS[d.tranche];
+  let html = "";
+  circuit.steps.forEach((step, i) => {
+    let cls = "wait";
+    if (d.statut === "rejected") cls = "wait";
+    else if (i < d.etape_idx) cls = "done";
+    else if (i === d.etape_idx && d.statut !== "done") cls = "active";
+    else if (d.statut === "done") cls = "done";
+    html += `<span class="frise-step ${cls}">${i < d.etape_idx || d.statut === 'done' ? '✓ ' : ''}${step}</span>`;
+    if (i < circuit.steps.length - 1) html += '<span class="frise-arrow">→</span>';
+  });
+  if (d.notaire) {
+    html += '<span class="frise-arrow">→</span><span class="frise-step notaire">⚖️ Notaire</span>';
+  }
+  document.getElementById("dm_circuit").innerHTML = html;
+}
+
+function renderModalActions(d) {
+  const container = document.getElementById("dm_actions");
+  const circuit = CIRCUITS[d.tranche];
+
+  if (d.statut === "done" || d.statut === "rejected") {
+    container.innerHTML = `<button class="btn-secondary" onclick="closeModal('detailModal')">Fermer</button>`;
+    return;
+  }
+
+  if (d.statut === "adjourned") {
+    if (currentRole === "ca" && d.ca === currentUser.nom) {
+      container.innerHTML = `
+        <button class="btn-secondary" onclick="closeModal('detailModal')">Fermer</button>
+        <button class="btn-primary" onclick="closeModal('detailModal');openRepresenter()">↩️ Représenter le dossier</button>`;
+    } else {
+      container.innerHTML = `<button class="btn-secondary" onclick="closeModal('detailModal')">Fermer</button>`;
+    }
+    return;
+  }
+
+  const currentStepRole = circuit.roles[d.etape_idx];
+  const canAct = currentStepRole === currentRole;
+
+  if (!canAct) {
+    container.innerHTML = `<button class="btn-secondary" onclick="closeModal('detailModal')">Fermer</button>
+      <div style="font-size:12px;color:var(--muted);align-self:center;margin-right:auto">En attente de : ${ROLES[currentStepRole]?.label || currentStepRole}</div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <button class="btn-secondary" onclick="closeModal('detailModal')">Fermer</button>
+    <button class="btn-danger" onclick="rejeterDossier()">❌ Rejeter</button>
+    <button class="btn-amber" onclick="closeModal('detailModal');openAjournement()">⏸ Ajourner</button>
+    <button class="btn-primary" onclick="avancerDossier()">✅ Valider et transmettre</button>
+  `;
+}
+
+function switchMTab(name, el) {
+  document.querySelectorAll(".mtab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".mtab-pane").forEach(p => p.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("mtab-" + name).classList.add("active");
+}
+
+function toggleAccordion(id) {
+  const el = document.getElementById(id);
+  const icon = document.getElementById("icon-" + id);
+  el.classList.toggle("open");
+  icon.textContent = el.classList.contains("open") ? "▲" : "▼";
+}
+
+// ════════════════════════════════════════════════════════
+// ANALYSE CRÉDIT
+// ════════════════════════════════════════════════════════
+function renderAnalyseForm(d) {
+  const a = d.analyse_credit || {};
+  document.getElementById("an_activite").value = a.activite || "";
+  document.getElementById("an_anciennete").value = a.anciennete || "";
+  document.getElementById("an_situation").value = a.situation || "";
+  document.getElementById("an_ca_mensuel").value = a.ca_mensuel || "";
+  document.getElementById("an_charges").value = a.charges || "";
+  document.getElementById("an_capacite").value = a.capacite || "";
+  document.getElementById("an_note").value = a.note || "";
+  document.getElementById("an_avis").value = a.avis || "";
+  document.getElementById("an_mrec").value = a.mrec || "";
+  document.getElementById("an_commentaire").value = a.commentaire || "";
+}
+
+async function saveAnalyse() {
+  const d = dossiers[currentDossierIdx];
+  const analyse_credit = {
+    activite: document.getElementById("an_activite").value,
+    anciennete: document.getElementById("an_anciennete").value,
+    situation: document.getElementById("an_situation").value,
+    ca_mensuel: document.getElementById("an_ca_mensuel").value,
+    charges: document.getElementById("an_charges").value,
+    capacite: document.getElementById("an_capacite").value,
+    note: document.getElementById("an_note").value,
+    avis: document.getElementById("an_avis").value,
+    mrec: document.getElementById("an_mrec").value,
+    commentaire: document.getElementById("an_commentaire").value
+  };
+  d.analyse_credit = analyse_credit;
+  addHistoryEntry(d, { t: "analyse", label: "Analyse crédit mise à jour", user: currentUser.nom, icon: "📊", cls: "h-bl" });
+  try {
+    await sbUpdate("ct_dossiers", d.id, { analyse_credit, history: d.history });
+    toast("Analyse enregistrée", "success");
+  } catch (e) { toast("Erreur : " + e.message, "error"); }
+}
+
+// ════════════════════════════════════════════════════════
+// HISTORIQUE
+// ════════════════════════════════════════════════════════
+function addHistoryEntry(d, entry) {
+  if (!d.history) d.history = [];
+  d.history.push({ ...entry, date: new Date().toISOString() });
+}
+
+function renderHistory(d) {
+  const list = [...(d.history || [])].reverse();
+  const container = document.getElementById("dm_history");
+  if (!list.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">Aucun historique</div></div>`;
+    return;
+  }
+  container.innerHTML = list.map(h => `
+    <div class="hist-item">
+      <div class="hist-dot ${h.cls || 'h-bl'}">${h.icon || '📝'}</div>
+      <div>
+        <div class="hist-title">${h.label}</div>
+        <div class="hist-meta">Par ${h.user} · ${fmtDT(h.date)}</div>
+        ${h.mailNotif ? `<div class="hist-mail">📧 Email envoyé${h.mailTo ? ' — ' + h.mailTo : ''}</div>` : ''}
+      </div>
+    </div>`).join("");
+}
+
+// ════════════════════════════════════════════════════════
+// AVANCEMENT / VALIDATION
+// ════════════════════════════════════════════════════════
+async function avancerDossier() {
+  const d = dossiers[currentDossierIdx];
+  const circuit = CIRCUITS[d.tranche];
+  const isLastStep = d.etape_idx >= circuit.steps.length - 1;
+
+  if (isLastStep) {
+    d.statut = "done";
+    addHistoryEntry(d, { t: "done", label: "Dossier décaissé", user: currentUser.nom, icon: "✅", cls: "h-gr" });
+  } else {
+    d.etape_idx++;
+    d.statut = "progress";
+    const nextRole = circuit.roles[d.etape_idx];
+    const nextLabel = circuit.steps[d.etape_idx];
+    addHistoryEntry(d, { t: "step", label: `Transmis à : ${nextLabel}`, user: currentUser.nom, icon: "➡️", cls: "h-gr", mailNotif: true });
+    await notifyNextActor(d, nextRole);
+  }
+
+  try {
+    await sbUpdate("ct_dossiers", d.id, { etape_idx: d.etape_idx, statut: d.statut, history: d.history });
+    closeModal("detailModal");
+    renderDashboard(); renderDossiers();
+    toast(d.statut === "done" ? "Dossier décaissé ✅" : "Étape validée — transmis à l'étape suivante", "success");
+  } catch (e) { toast("Erreur : " + e.message, "error"); }
+}
+
+async function rejeterDossier() {
+  if (!confirm("Confirmer le rejet de ce dossier ? Cette action est définitive.")) return;
+  const d = dossiers[currentDossierIdx];
+  d.statut = "rejected";
+  addHistoryEntry(d, { t: "rej", label: "Dossier rejeté", user: currentUser.nom, icon: "❌", cls: "h-re", mailNotif: true, mailTo: d.ca });
+  try {
+    await sbUpdate("ct_dossiers", d.id, { statut: "rejected", history: d.history });
+    await sendCAEmail(d, "Dossier rejeté", `Le dossier ${d.dossier_id} (${d.client}) a été rejeté par ${currentUser.nom}.`);
+    closeModal("detailModal");
+    renderDashboard(); renderDossiers();
+    toast("Dossier rejeté", "error");
+  } catch (e) { toast("Erreur : " + e.message, "error"); }
+}
+
+// ════════════════════════════════════════════════════════
+// AJOURNEMENT
+// ════════════════════════════════════════════════════════
+function openAjournement() {
+  document.getElementById("adj_motif").value = "";
+  document.getElementById("adj_commentaire").value = "";
+  openModal("adjModal");
+}
+
+async function confirmAjournement() {
+  const motif = document.getElementById("adj_motif").value;
+  const com = document.getElementById("adj_commentaire").value.trim();
+  if (!motif || !com) { toast("Motif et précisions requis", "error"); return; }
+
+  const d = dossiers[currentDossierIdx];
+  d.statut = "adjourned";
+  d.adj_motif = motif;
+  d.adj_com = com;
+  d.adj_by = currentUser.nom;
+  d.adj_date = new Date().toISOString();
+
+  addHistoryEntry(d, { t: "adj", label: `Ajourné — ${motif}`, user: currentUser.nom, icon: "⏸", cls: "h-am", mailNotif: true, mailTo: d.ca });
+
+  try {
+    await sbUpdate("ct_dossiers", d.id, {
+      statut: "adjourned", adj_motif: motif, adj_com: com, adj_by: currentUser.nom, adj_date: d.adj_date, history: d.history
+    });
+    await sendCAEmail(d, "Dossier ajourné", `Le dossier ${d.dossier_id} (${d.client}) a été ajourné par ${currentUser.nom}.\n\nMotif : ${motif}\nDétails : ${com}`);
+    closeModal("adjModal");
+    renderDashboard(); renderDossiers();
+    toast(`Ajourné — ${d.ca} notifié par email`, "info");
+  } catch (e) { toast("Erreur : " + e.message, "error"); }
+}
+
+// ════════════════════════════════════════════════════════
+// REPRÉSENTER (CA)
+// ════════════════════════════════════════════════════════
+function openRepresenter() {
+  const d = dossiers[currentDossierIdx];
+  document.getElementById("rep_motif_display").textContent = `Motif de l'ajournement : ${d.adj_motif} — ${d.adj_com}`;
+  document.getElementById("rep_commentaire").value = "";
+  openModal("repModal");
+}
+
+async function confirmRepresenter() {
+  const d = dossiers[currentDossierIdx];
+  const com = document.getElementById("rep_commentaire").value.trim();
+  const adjByUser = users.find(u => u.nom === d.adj_by);
+
+  d.statut = "progress";
+  addHistoryEntry(d, { t: "rep", label: "Dossier représenté par le CA", user: currentUser.nom, icon: "↩️", cls: "h-gr", mailNotif: true, mailTo: d.adj_by });
+
+  try {
+    await sbUpdate("ct_dossiers", d.id, { statut: "progress", adj_motif: null, adj_com: null, adj_by: null, adj_date: null, history: d.history });
+    if (adjByUser) {
+      await sendEmail(adjByUser.email, "Dossier représenté", `Le dossier ${d.dossier_id} (${d.client}) a été représenté par ${currentUser.nom}.\n\nÉléments apportés : ${com || 'Voir dossier mis à jour.'}`);
+    }
+    closeModal("repModal");
+    renderDashboard(); renderDossiers();
+    toast("Dossier représenté avec succès", "success");
+  } catch (e) { toast("Erreur : " + e.message, "error"); }
+}
+
+// ════════════════════════════════════════════════════════
+// PIÈCES JOINTES
+// ════════════════════════════════════════════════════════
+function fileIcon(name) {
+  const ext = (name.split(".").pop() || "").toLowerCase();
+  if (ext === "pdf") return "📄";
+  if (["doc", "docx"].includes(ext)) return "📝";
+  if (["xls", "xlsx", "csv"].includes(ext)) return "📊";
+  if (["jpg", "jpeg", "png", "gif"].includes(ext)) return "🖼️";
+  return "📎";
+}
+function fmtSize(bytes) {
+  if (!bytes) return "";
+  if (bytes < 1024) return bytes + " o";
+  if (bytes < 1048576) return (bytes / 1024).toFixed(0) + " Ko";
+  return (bytes / 1048576).toFixed(1) + " Mo";
+}
+
+function renderFilesList(containerId, files, isNew) {
+  const el = document.getElementById(containerId);
+  if (!files.length) { el.innerHTML = ""; return; }
+  el.innerHTML = files.map((f, i) => `
+    <div class="fitem">
+      <div class="fil"><div class="fico">${fileIcon(f.name)}</div><div><div class="fname">${f.name}</div><div class="fsize">${fmtSize(f.size)}</div></div></div>
+      <button class="fdel" onclick="removeFile(${i}, ${isNew})">✕</button>
+    </div>`).join("");
+}
+
+function setupFileHandlers() {
+  ["nf", "dm"].forEach(prefix => {
+    const drop = document.getElementById(prefix + "_drop") || document.getElementById(prefix === "nf" ? "nf_drop" : "dm_drop");
+    const input = document.getElementById(prefix + "_file_input");
+    if (!drop || !input) return;
+    input.addEventListener("change", e => processFiles(e.target.files, prefix === "nf"));
+    drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("drag"); });
+    drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+    drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("drag"); processFiles(e.dataTransfer.files, prefix === "nf"); });
+  });
+}
+
+function processFiles(fileList, isNew) {
+  Array.from(fileList).forEach(f => {
+    const item = { name: f.name, size: f.size };
+    if (isNew) { newFiles.push(item); renderFilesList("nf_files_list", newFiles, true); }
+    else {
+      detailFiles.push(item);
+      const d = dossiers[currentDossierIdx];
+      d.files = detailFiles;
+      addHistoryEntry(d, { t: "pj", label: `Pièce jointe ajoutée : ${f.name}`, user: currentUser.nom, icon: "📎", cls: "h-bl" });
+      sbUpdate("ct_dossiers", d.id, { files: detailFiles, history: d.history }).catch(() => {});
+      renderFilesList("dm_files_list", detailFiles, false);
+      renderHistory(d);
+    }
+  });
+}
+
+function removeFile(i, isNew) {
+  if (isNew) { newFiles.splice(i, 1); renderFilesList("nf_files_list", newFiles, true); }
+  else {
+    detailFiles.splice(i, 1);
+    const d = dossiers[currentDossierIdx];
+    d.files = detailFiles;
+    sbUpdate("ct_dossiers", d.id, { files: detailFiles }).catch(() => {});
+    renderFilesList("dm_files_list", detailFiles, false);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// NOTIFICATIONS PAR EMAIL (EmailJS)
+// ════════════════════════════════════════════════════════
+async function sendEmail(toEmail, subject, message) {
+  if (!toEmail) return false;
+  if (typeof emailjs === "undefined") { console.warn("EmailJS non chargé"); return false; }
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: toEmail, subject: subject, message: message, app_name: "CréditTrack — Coris Mésofinance"
+    });
+    return true;
+  } catch (e) {
+    console.error("Erreur envoi email:", e);
+    return false;
+  }
+}
+
+async function notifyNextActor(d, roleKey) {
+  const actor = users.find(u => u.role === roleKey && u.actif);
+  if (actor && actor.email) {
+    await sendEmail(actor.email, `Nouveau dossier à traiter — ${d.dossier_id}`,
+      `Le dossier ${d.dossier_id} (Client : ${d.client}, Montant : ${fmt(d.montant)} FCFA) requiert votre validation.\n\nÉtape : ${ROLES[roleKey]?.label || roleKey}\nTransmis par : ${currentUser.nom}`);
+  }
+  // Notification interne in-app également
+  pushInternalNotif(d, `Dossier transmis à ${ROLES[roleKey]?.label || roleKey}`, roleKey);
+
+  // Si notaire requis et qu'on arrive à l'étape Engagements, notifier aussi la juridique
+  if (d.notaire && roleKey === "engagements") {
+    const juriste = users.find(u => u.role === "juridique" && u.actif);
+    if (juriste && juriste.email) {
+      await sendEmail(juriste.email, `Passage notaire requis — ${d.dossier_id}`,
+        `Le dossier ${d.dossier_id} (Client : ${d.client}) comporte une hypothèque et requiert votre intervention pour le passage notaire.`);
+    }
+  }
+}
+
+async function sendCAEmail(d, subject, message) {
+  const caUser = users.find(u => u.nom === d.ca);
+  if (caUser && caUser.email) await sendEmail(caUser.email, subject + ` — ${d.dossier_id}`, message);
+}
+
+// ════════════════════════════════════════════════════════
+// NOTIFICATIONS IN-APP
+// ════════════════════════════════════════════════════════
+function pushInternalNotif(d, text, forRole) {
+  notifications.unshift({ id: Date.now(), dossierId: d.dossier_id, idx: dossiers.indexOf(d), text, forRole, date: new Date().toISOString(), read: false });
+  buildNotifications();
+}
+
+function buildNotifications() {
+  const relevant = notifications.filter(n => n.forRole === currentRole);
+  const unread = relevant.filter(n => !n.read).length;
+  document.getElementById("ndot").classList.toggle("show", unread > 0);
+
+  const list = document.getElementById("npanelList");
+  if (!relevant.length) {
+    list.innerHTML = `<div class="empty-state" style="padding:30px 16px"><div class="empty-text">Aucune notification</div></div>`;
+    return;
+  }
+  list.innerHTML = relevant.slice(0, 15).map(n => `
+    <div class="npi ${n.read ? '' : 'unread'}" onclick="openDetail(${n.idx});markRead(${n.id})">
+      <div class="npi-title">${n.dossierId}</div>
+      <div class="npi-body">${n.text}</div>
+      <div class="npi-time">${fmtDT(n.date)}</div>
+    </div>`).join("");
+}
+
+function markRead(id) {
+  const n = notifications.find(x => x.id === id);
+  if (n) n.read = true;
+  buildNotifications();
+}
+
+function toggleNotifPanel() {
+  document.getElementById("npanel").classList.toggle("open");
+}
+function closeNotifPanel() {
+  document.getElementById("npanel").classList.remove("open");
+}
+
+// ════════════════════════════════════════════════════════
+// EXPORT CSV
+// ════════════════════════════════════════════════════════
+function exportCSV() {
+  let list = getVisibleDossiers();
+  const ca = document.getElementById("exp_ca").value;
+  const st = document.getElementById("exp_statut").value;
+  if (ca) list = list.filter(d => d.ca === ca);
+  if (st) list = list.filter(d => d.statut === st);
+
+  if (!list.length) { toast("Aucun dossier à exporter", "error"); return; }
+
+  const headers = ["N° Dossier", "Client", "CA", "Montant FCFA", "Tranche", "Garanties", "Statut", "Date", "Étape actuelle", "PJ", "Note risque", "Avis"];
+  const rows = list.map(d => {
+    const circuit = CIRCUITS[d.tranche];
+    const step = circuit ? circuit.steps[d.etape_idx] : "—";
+    return [d.dossier_id, d.client, d.ca, d.montant, d.tranche.toUpperCase(),
+      (d.garanties || []).map(g => GARANTIE_LABELS[g]).join(" / "),
+      d.statut, d.date, step, (d.files || []).length, d.analyse_credit?.note || "", d.analyse_credit?.avis || ""];
+  });
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c || "").replace(/"/g, '""')}"`).join(";")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "credittrack_" + new Date().toISOString().split("T")[0] + ".csv";
+  a.click();
+  toast("Export téléchargé (" + list.length + " dossiers)", "success");
+}
+
+// ════════════════════════════════════════════════════════
+// USERS (ADMIN)
+// ════════════════════════════════════════════════════════
+function renderUsers() {
+  const container = document.getElementById("users_list");
+  if (!users.length) { container.innerHTML = `<div class="empty-state"><div class="empty-text">Aucun utilisateur</div></div>`; return; }
+  container.innerHTML = users.map(u => {
+    const r = ROLES[u.role] || { label: u.role, color: "#6b7a99", bg: "#f5f7fa" };
+    const initials = (u.nom || "").split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase();
+    return `<div class="urow">
+      <div class="uinfo">
+        <div class="uav" style="background:${r.bg};color:${r.color}">${initials}</div>
+        <div><div class="uname">${u.nom}</div><div class="umeta">${u.email}</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="role-badge" style="background:${r.bg};color:${r.color}">${r.label}</span>
+        <span style="font-size:11px;color:${u.actif ? 'var(--success)' : 'var(--muted)'}">${u.actif ? '● Actif' : '○ Inactif'}</span>
+        ${u.email !== currentUser.email ? `<button class="btn-danger" style="padding:5px 12px;font-size:11px" onclick="deactivateUser('${u.id}','${u.nom}')">Désactiver</button>` : '<span style="font-size:11px;color:var(--muted)">Vous</span>'}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function createUser() {
+  const nom = document.getElementById("nu_nom").value.trim();
+  const email = document.getElementById("nu_email").value.trim();
+  const pwd = document.getElementById("nu_pwd").value.trim();
+  const role = document.getElementById("nu_role").value;
+  if (!nom || !email || !pwd) { toast("Tous les champs sont obligatoires", "error"); return; }
+
+  showLoad(true, "Création du compte...");
+  try {
+    const r = await fetch(`${SB_URL}/auth/v1/admin/users`, {
+      method: "POST",
+      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + currentSession, "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password: pwd, email_confirm: true })
+    });
+    const data = await r.json();
+    if (data.error) throw new Error(data.msg || data.error);
+
+    await fetch(`${SB_URL}/rest/v1/ct_profiles`, {
+      method: "POST",
+      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + currentSession, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify({ id: data.id, email, nom, role, actif: true })
+    });
+
+    toast("Compte créé pour " + nom, "success");
+    document.getElementById("nu_nom").value = "";
+    document.getElementById("nu_email").value = "";
+    document.getElementById("nu_pwd").value = "Coris@2026";
+    await loadAllData();
+    renderUsers();
+  } catch (e) { toast("Erreur : " + e.message, "error"); }
+  showLoad(false);
+}
+
+async function deactivateUser(id, nom) {
+  if (!confirm(`Désactiver le compte de "${nom}" ?`)) return;
+  try {
+    await sbUpdate("ct_profiles", id, { actif: false });
+    toast("Compte de " + nom + " désactivé", "success");
+    await loadAllData();
+    renderUsers();
+  } catch (e) { toast("Erreur : " + e.message, "error"); }
+}
+
+// ════════════════════════════════════════════════════════
+// CHANGEMENT MOT DE PASSE
+// ════════════════════════════════════════════════════════
+async function changePassword() {
+  const pwd = document.getElementById("newPwdInput").value;
+  const confirm = document.getElementById("confirmPwdInput").value;
+  if (!pwd || pwd.length < 6) { toast("Mot de passe trop court (6 caractères min)", "error"); return; }
+  if (pwd !== confirm) { toast("Les mots de passe ne correspondent pas", "error"); return; }
+  try {
+    const r = await fetch(`${SB_URL}/auth/v1/user`, {
+      method: "PUT",
+      headers: { "apikey": SB_KEY, "Authorization": "Bearer " + currentSession, "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pwd })
+    });
+    if (!r.ok) throw new Error("Erreur");
+    toast("Mot de passe modifié", "success");
+    closeModal("pwdModal");
+    document.getElementById("newPwdInput").value = "";
+    document.getElementById("confirmPwdInput").value = "";
+  } catch (e) { toast("Erreur : " + e.message, "error"); }
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+async function init() {
+  setupFileHandlers();
+  const saved = sessionStorage.getItem("ct_session");
+  if (saved) {
+    try {
+      const s = JSON.parse(saved);
+      currentSession = s.token;
+      currentUser = s.user;
+      currentRole = s.user.role;
+      showApp();
+      return;
+    } catch (e) { sessionStorage.removeItem("ct_session"); }
+  }
+  document.getElementById("loginPage").style.display = "flex";
+  document.getElementById("appPage").style.display = "none";
+  document.getElementById("loginPwd")?.addEventListener("keypress", e => { if (e.key === "Enter") doLogin(); });
+}
+
+init();
+
+</script>
+</body>
+</html>
