@@ -536,43 +536,92 @@
       </div>
 
       <div class="mtab-pane" id="mtab-analyse">
-        <div class="alert a-info">📊 Fiche d'analyse — à compléter par le département Risques ou le chargé d'affaires selon la tranche.</div>
-        <div class="asec">
-          <div class="ahead" onclick="toggleAccordion('acc-client')"><h4>1. Présentation du client</h4><span id="icon-acc-client">▼</span></div>
-          <div class="abody" id="acc-client">
-            <div class="agrid">
-              <div class="form-group"><label>Activité</label><input type="text" id="an_activite"></div>
-              <div class="form-group"><label>Ancienneté activité</label><input type="text" id="an_anciennete" placeholder="ex: 5 ans"></div>
-              <div class="form-group"><label>Situation familiale</label><input type="text" id="an_situation"></div>
-            </div>
-          </div>
+        <div class="mtabs" style="margin-bottom:14px">
+          <div class="mtab active" id="subtab-caf" onclick="switchAnalyseSubTab('caf',this)">📝 Analyse CAF</div>
+          <div class="mtab" id="subtab-risk" onclick="switchAnalyseSubTab('risk',this)">🔍 Analyse Risque</div>
         </div>
-        <div class="asec">
-          <div class="ahead" onclick="toggleAccordion('acc-fin')"><h4>2. Analyse financière</h4><span id="icon-acc-fin">▼</span></div>
-          <div class="abody" id="acc-fin">
-            <div class="agrid">
-              <div class="form-group"><label>Chiffre d'affaires mensuel</label><input type="number" id="an_ca_mensuel"></div>
-              <div class="form-group"><label>Charges mensuelles</label><input type="number" id="an_charges"></div>
-              <div class="form-group"><label>Capacité de remboursement</label><input type="number" id="an_capacite"></div>
-            </div>
-          </div>
-        </div>
-        <div class="asec">
-          <div class="ahead" onclick="toggleAccordion('acc-risque')"><h4>3. Évaluation du risque</h4><span id="icon-acc-risque">▼</span></div>
-          <div class="abody" id="acc-risque">
-            <div class="agrid">
-              <div class="form-group"><label>Note risque</label>
-                <select id="an_note"><option value="">—</option><option>A — Très faible risque</option><option>B — Faible risque</option><option>C — Risque modéré</option><option>D — Risque élevé</option></select>
+
+        <!-- ANALYSE CAF -->
+        <div class="mtab-pane active" id="analyse-caf-pane">
+          <div class="alert a-info" id="caf-analyse-info">📝 Fiche remplie par le Chargé d'affaires lors de l'instruction du dossier.</div>
+          <div class="asec">
+            <div class="ahead" onclick="toggleAccordion('caf-acc-client')"><h4>1. Présentation du client</h4><span id="icon-caf-acc-client">▼</span></div>
+            <div class="abody" id="caf-acc-client">
+              <div class="agrid">
+                <div class="form-group"><label>Activité</label><input type="text" id="caf_activite"></div>
+                <div class="form-group"><label>Ancienneté activité</label><input type="text" id="caf_anciennete" placeholder="ex: 5 ans"></div>
+                <div class="form-group"><label>Situation familiale</label><input type="text" id="caf_situation"></div>
               </div>
-              <div class="form-group"><label>Avis</label>
-                <select id="an_avis"><option value="">—</option><option>✅ Favorable</option><option>⚠️ Favorable sous réserve</option><option>❌ Défavorable</option></select>
-              </div>
-              <div class="form-group"><label>Montant recommandé</label><input type="number" id="an_mrec"></div>
             </div>
-            <div class="form-group full" style="margin-top:10px"><label>Commentaire</label><textarea id="an_commentaire"></textarea></div>
           </div>
+          <div class="asec">
+            <div class="ahead" onclick="toggleAccordion('caf-acc-fin')"><h4>2. Analyse financière</h4><span id="icon-caf-acc-fin">▼</span></div>
+            <div class="abody" id="caf-acc-fin">
+              <div class="agrid">
+                <div class="form-group"><label>Chiffre d'affaires mensuel</label><input type="number" id="caf_ca_mensuel"></div>
+                <div class="form-group"><label>Charges mensuelles</label><input type="number" id="caf_charges"></div>
+                <div class="form-group"><label>Capacité de remboursement</label><input type="number" id="caf_capacite"></div>
+              </div>
+            </div>
+          </div>
+          <div class="asec">
+            <div class="ahead" onclick="toggleAccordion('caf-acc-risque')"><h4>3. Évaluation du risque (avis CAF)</h4><span id="icon-caf-acc-risque">▼</span></div>
+            <div class="abody" id="caf-acc-risque">
+              <div class="agrid">
+                <div class="form-group"><label>Note risque</label>
+                  <select id="caf_note"><option value="">—</option><option>A — Très faible risque</option><option>B — Faible risque</option><option>C — Risque modéré</option><option>D — Risque élevé</option></select>
+                </div>
+                <div class="form-group"><label>Avis</label>
+                  <select id="caf_avis"><option value="">—</option><option>✅ Favorable</option><option>⚠️ Favorable sous réserve</option><option>❌ Défavorable</option></select>
+                </div>
+                <div class="form-group"><label>Montant recommandé</label><input type="number" id="caf_mrec"></div>
+              </div>
+              <div class="form-group full" style="margin-top:10px"><label>Commentaire</label><textarea id="caf_commentaire"></textarea></div>
+            </div>
+          </div>
+          <button class="btn-primary" id="btn-save-caf-analyse" onclick="saveAnalyseCAF()" style="margin-top:8px">💾 Enregistrer mon analyse</button>
         </div>
-        <button class="btn-primary" onclick="saveAnalyse()" style="margin-top:8px">💾 Enregistrer l'analyse</button>
+
+        <!-- ANALYSE RISQUE -->
+        <div class="mtab-pane" id="analyse-risk-pane">
+          <div class="alert a-purple" id="risk-analyse-info">🔍 Fiche remplie par le Responsable risque — comparez avec l'analyse du CAF dans l'onglet précédent.</div>
+          <div class="asec">
+            <div class="ahead" onclick="toggleAccordion('risk-acc-client')"><h4>1. Présentation du client</h4><span id="icon-risk-acc-client">▼</span></div>
+            <div class="abody" id="risk-acc-client">
+              <div class="agrid">
+                <div class="form-group"><label>Activité</label><input type="text" id="risk_activite"></div>
+                <div class="form-group"><label>Ancienneté activité</label><input type="text" id="risk_anciennete" placeholder="ex: 5 ans"></div>
+                <div class="form-group"><label>Situation familiale</label><input type="text" id="risk_situation"></div>
+              </div>
+            </div>
+          </div>
+          <div class="asec">
+            <div class="ahead" onclick="toggleAccordion('risk-acc-fin')"><h4>2. Analyse financière</h4><span id="icon-risk-acc-fin">▼</span></div>
+            <div class="abody" id="risk-acc-fin">
+              <div class="agrid">
+                <div class="form-group"><label>Chiffre d'affaires mensuel</label><input type="number" id="risk_ca_mensuel"></div>
+                <div class="form-group"><label>Charges mensuelles</label><input type="number" id="risk_charges"></div>
+                <div class="form-group"><label>Capacité de remboursement</label><input type="number" id="risk_capacite"></div>
+              </div>
+            </div>
+          </div>
+          <div class="asec">
+            <div class="ahead" onclick="toggleAccordion('risk-acc-risque')"><h4>3. Évaluation du risque (avis Risques)</h4><span id="icon-risk-acc-risque">▼</span></div>
+            <div class="abody" id="risk-acc-risque">
+              <div class="agrid">
+                <div class="form-group"><label>Note risque</label>
+                  <select id="risk_note"><option value="">—</option><option>A — Très faible risque</option><option>B — Faible risque</option><option>C — Risque modéré</option><option>D — Risque élevé</option></select>
+                </div>
+                <div class="form-group"><label>Avis</label>
+                  <select id="risk_avis"><option value="">—</option><option>✅ Favorable</option><option>⚠️ Favorable sous réserve</option><option>❌ Défavorable</option></select>
+                </div>
+                <div class="form-group"><label>Montant recommandé</label><input type="number" id="risk_mrec"></div>
+              </div>
+              <div class="form-group full" style="margin-top:10px"><label>Commentaire</label><textarea id="risk_commentaire"></textarea></div>
+            </div>
+          </div>
+          <button class="btn-primary" id="btn-save-risk-analyse" onclick="saveAnalyseRisque()" style="margin-top:8px">💾 Enregistrer l'analyse risque</button>
+        </div>
       </div>
 
       <div class="mtab-pane" id="mtab-pj">
@@ -800,7 +849,7 @@ function showApp() {
   document.getElementById("userBadgeName").textContent = currentUser.nom || currentUser.email;
   document.getElementById("userBadgeRole").textContent = (ROLES[currentRole] || {}).label || currentRole;
 
-  const isAdmin = currentRole === "admin";
+  const isAdmin = currentUser.is_admin === true;
   const isCA = currentRole === "ca";
   document.querySelectorAll(".admin-only").forEach(el => el.style.display = isAdmin ? "" : "none");
   document.querySelectorAll(".caf-only").forEach(el => el.style.display = isCA ? "" : "none");
@@ -846,7 +895,7 @@ async function loadAllData() {
       sbGet("ct_dossiers", "&order=created_at.desc"),
       sbGet("ct_profiles", "&order=nom.asc")
     ]);
-    dossiers = dRes.map(d => ({ ...d, garanties: d.garanties || [], history: d.history || [], files: d.files || [], analyse_credit: d.analyse_credit || {} }));
+    dossiers = dRes.map(d => ({ ...d, garanties: d.garanties || [], history: d.history || [], files: d.files || [], analyse_caf: d.analyse_caf || {}, analyse_risque: d.analyse_risque || {} }));
     users = uRes;
     setStatus(true);
     populateSelects();
@@ -1097,7 +1146,15 @@ function renderCircuitPreview(tranche) {
 
 function resetNewForm() {
   ["nf_client", "nf_montant", "nf_objet", "nf_duree"].forEach(id => document.getElementById(id).value = "");
-  document.getElementById("nf_ca").selectedIndex = 0;
+  const caSelect = document.getElementById("nf_ca");
+  if (currentRole === "ca") {
+    // Le CAF ne peut créer un dossier qu'à son propre nom
+    caSelect.value = currentUser.nom;
+    caSelect.disabled = true;
+  } else {
+    caSelect.selectedIndex = 0;
+    caSelect.disabled = false;
+  }
   document.querySelectorAll(".garantie-chk").forEach(c => c.checked = false);
   document.getElementById("hypo_alert").style.display = "none";
   document.getElementById("nf_tranche_disp").textContent = "Saisir un montant...";
@@ -1127,13 +1184,13 @@ async function createDossier() {
   const row = {
     dossier_id: id, client, ca, montant, objet, duree, tranche, garanties, notaire,
     etape_idx: 0, statut: "new", date: new Date().toISOString().split("T")[0],
-    files: [...newFiles], analyse_credit: {},
+    files: [...newFiles], analyse_caf: {}, analyse_risque: {},
     history: [{ t: "create", label: "Dossier créé", user: currentUser.nom, icon: "📝", cls: "h-bl", date: new Date().toISOString() }]
   };
 
   try {
     const created = await sbInsert("ct_dossiers", row);
-    dossiers.unshift({ ...created, garanties: created.garanties || [], history: created.history || [], files: created.files || [], analyse_credit: created.analyse_credit || {} });
+    dossiers.unshift({ ...created, garanties: created.garanties || [], history: created.history || [], files: created.files || [], analyse_caf: created.analyse_caf || {}, analyse_risque: created.analyse_risque || {} });
 
     // Notifier le premier acteur du circuit (chef d'agence)
     await notifyNextActor(dossiers[0], CIRCUITS[tranche].roles[0]);
@@ -1253,8 +1310,9 @@ function renderModalActions(d) {
 }
 
 function switchMTab(name, el) {
-  document.querySelectorAll(".mtab").forEach(t => t.classList.remove("active"));
-  document.querySelectorAll(".mtab-pane").forEach(p => p.classList.remove("active"));
+  // Onglets de premier niveau uniquement (.mbody > .mtabs > .mtab)
+  document.querySelectorAll(".modal-body > .mtabs > .mtab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".modal-body > .mtab-pane").forEach(p => p.classList.remove("active"));
   el.classList.add("active");
   document.getElementById("mtab-" + name).classList.add("active");
 }
@@ -1267,41 +1325,79 @@ function toggleAccordion(id) {
 }
 
 // ════════════════════════════════════════════════════════
-// ANALYSE CRÉDIT
+// ANALYSE CRÉDIT — DEUX FICHES (CAF + RISQUE)
 // ════════════════════════════════════════════════════════
-function renderAnalyseForm(d) {
-  const a = d.analyse_credit || {};
-  document.getElementById("an_activite").value = a.activite || "";
-  document.getElementById("an_anciennete").value = a.anciennete || "";
-  document.getElementById("an_situation").value = a.situation || "";
-  document.getElementById("an_ca_mensuel").value = a.ca_mensuel || "";
-  document.getElementById("an_charges").value = a.charges || "";
-  document.getElementById("an_capacite").value = a.capacite || "";
-  document.getElementById("an_note").value = a.note || "";
-  document.getElementById("an_avis").value = a.avis || "";
-  document.getElementById("an_mrec").value = a.mrec || "";
-  document.getElementById("an_commentaire").value = a.commentaire || "";
+function switchAnalyseSubTab(name, el) {
+  document.querySelectorAll("#mtab-analyse .mtab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll("#mtab-analyse .mtab-pane").forEach(p => p.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("analyse-" + name + "-pane").classList.add("active");
 }
 
-async function saveAnalyse() {
+function setFieldsState(prefix, fields, readonly) {
+  fields.forEach(f => {
+    const el = document.getElementById(prefix + "_" + f);
+    if (el) el.disabled = readonly;
+  });
+}
+
+function renderAnalyseForm(d) {
+  const fieldKeys = ["activite", "anciennete", "situation", "ca_mensuel", "charges", "capacite", "note", "avis", "mrec", "commentaire"];
+
+  // Charger fiche CAF
+  const cafA = d.analyse_caf || {};
+  fieldKeys.forEach(k => { const el = document.getElementById("caf_" + k); if (el) el.value = cafA[k] || ""; });
+
+  // Charger fiche Risque
+  const riskA = d.analyse_risque || {};
+  fieldKeys.forEach(k => { const el = document.getElementById("risk_" + k); if (el) el.value = riskA[k] || ""; });
+
+  // Permissions : seul le CAF du dossier peut modifier sa fiche
+  const canEditCAF = currentRole === "ca" && d.ca === currentUser.nom;
+  setFieldsState("caf", fieldKeys, !canEditCAF);
+  document.getElementById("btn-save-caf-analyse").style.display = canEditCAF ? "" : "none";
+  document.getElementById("caf-analyse-info").textContent = canEditCAF
+    ? "📝 Vous pouvez compléter cette fiche d'analyse pour votre dossier."
+    : "📝 Fiche remplie par le Chargé d'affaires lors de l'instruction du dossier (lecture seule).";
+
+  // Permissions : seul le Responsable risque peut modifier sa fiche
+  const canEditRisk = currentRole === "resp_risque";
+  setFieldsState("risk", fieldKeys, !canEditRisk);
+  document.getElementById("btn-save-risk-analyse").style.display = canEditRisk ? "" : "none";
+  document.getElementById("risk-analyse-info").textContent = canEditRisk
+    ? "🔍 Vous pouvez compléter cette fiche d'analyse risque — comparez avec l'analyse du CAF."
+    : "🔍 Fiche remplie par le Responsable risque (lecture seule) — comparez avec l'analyse du CAF dans l'onglet précédent.";
+
+  // Réafficher le premier sous-onglet par défaut
+  document.querySelectorAll("#mtab-analyse .mtab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll("#mtab-analyse .mtab-pane").forEach(p => p.classList.remove("active"));
+  document.getElementById("subtab-caf").classList.add("active");
+  document.getElementById("analyse-caf-pane").classList.add("active");
+}
+
+async function saveAnalyseCAF() {
   const d = dossiers[currentDossierIdx];
-  const analyse_credit = {
-    activite: document.getElementById("an_activite").value,
-    anciennete: document.getElementById("an_anciennete").value,
-    situation: document.getElementById("an_situation").value,
-    ca_mensuel: document.getElementById("an_ca_mensuel").value,
-    charges: document.getElementById("an_charges").value,
-    capacite: document.getElementById("an_capacite").value,
-    note: document.getElementById("an_note").value,
-    avis: document.getElementById("an_avis").value,
-    mrec: document.getElementById("an_mrec").value,
-    commentaire: document.getElementById("an_commentaire").value
-  };
-  d.analyse_credit = analyse_credit;
-  addHistoryEntry(d, { t: "analyse", label: "Analyse crédit mise à jour", user: currentUser.nom, icon: "📊", cls: "h-bl" });
+  const fieldKeys = ["activite", "anciennete", "situation", "ca_mensuel", "charges", "capacite", "note", "avis", "mrec", "commentaire"];
+  const analyse_caf = {};
+  fieldKeys.forEach(k => analyse_caf[k] = document.getElementById("caf_" + k).value);
+  d.analyse_caf = analyse_caf;
+  addHistoryEntry(d, { t: "analyse", label: "Analyse CAF mise à jour", user: currentUser.nom, icon: "📝", cls: "h-bl" });
   try {
-    await sbUpdate("ct_dossiers", d.id, { analyse_credit, history: d.history });
-    toast("Analyse enregistrée", "success");
+    await sbUpdate("ct_dossiers", d.id, { analyse_caf, history: d.history });
+    toast("Votre analyse a été enregistrée", "success");
+  } catch (e) { toast("Erreur : " + e.message, "error"); }
+}
+
+async function saveAnalyseRisque() {
+  const d = dossiers[currentDossierIdx];
+  const fieldKeys = ["activite", "anciennete", "situation", "ca_mensuel", "charges", "capacite", "note", "avis", "mrec", "commentaire"];
+  const analyse_risque = {};
+  fieldKeys.forEach(k => analyse_risque[k] = document.getElementById("risk_" + k).value);
+  d.analyse_risque = analyse_risque;
+  addHistoryEntry(d, { t: "analyse", label: "Analyse Risque mise à jour", user: currentUser.nom, icon: "🔍", cls: "h-am" });
+  try {
+    await sbUpdate("ct_dossiers", d.id, { analyse_risque, history: d.history });
+    toast("Analyse risque enregistrée", "success");
   } catch (e) { toast("Erreur : " + e.message, "error"); }
 }
 
@@ -1595,13 +1691,13 @@ function exportCSV() {
 
   if (!list.length) { toast("Aucun dossier à exporter", "error"); return; }
 
-  const headers = ["N° Dossier", "Client", "CA", "Montant FCFA", "Tranche", "Garanties", "Statut", "Date", "Étape actuelle", "PJ", "Note risque", "Avis"];
+  const headers = ["N° Dossier", "Client", "CA", "Montant FCFA", "Tranche", "Garanties", "Statut", "Date", "Étape actuelle", "PJ", "Note CAF", "Avis CAF", "Note Risque", "Avis Risque"];
   const rows = list.map(d => {
     const circuit = CIRCUITS[d.tranche];
     const step = circuit ? circuit.steps[d.etape_idx] : "—";
     return [d.dossier_id, d.client, d.ca, d.montant, d.tranche.toUpperCase(),
       (d.garanties || []).map(g => GARANTIE_LABELS[g]).join(" / "),
-      d.statut, d.date, step, (d.files || []).length, d.analyse_credit?.note || "", d.analyse_credit?.avis || ""];
+      d.statut, d.date, step, (d.files || []).length, d.analyse_caf?.note || "", d.analyse_caf?.avis || "", d.analyse_risque?.note || "", d.analyse_risque?.avis || ""];
   });
   const csv = [headers, ...rows].map(r => r.map(c => `"${String(c || "").replace(/"/g, '""')}"`).join(";")).join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
