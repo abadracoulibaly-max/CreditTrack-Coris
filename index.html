@@ -346,6 +346,10 @@
       <div class="kpi-card gold"><div class="kpi-label">Décaissés ce mois</div><div class="kpi-value" id="kpi_decaisses">—</div><div class="kpi-sub">dossiers</div></div>
       <div class="kpi-card red"><div class="kpi-label">Ajournés</div><div class="kpi-value" id="kpi_ajournes">—</div><div class="kpi-sub">en attente CA</div></div>
     </div>
+    <div class="card manager-only" id="dash_etapes_card">
+      <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px">🔀 Répartition des dossiers par étape</div>
+      <div id="dash_etapes_grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"></div>
+    </div>
     <div class="card">
       <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px">📋 Dossiers nécessitant votre action</div>
       <div id="dash_action_list"></div>
@@ -533,6 +537,8 @@
         <div id="dm_adj_box"></div>
         <div class="detail-item-label" style="margin-bottom:8px">Circuit de validation</div>
         <div id="dm_circuit" class="frise"></div>
+        <div class="detail-item-label" style="margin:18px 0 8px">Historique des validations</div>
+        <div id="dm_validations"></div>
       </div>
 
       <div class="mtab-pane" id="mtab-analyse">
@@ -851,8 +857,10 @@ function showApp() {
 
   const isAdmin = currentUser.is_admin === true;
   const isCA = currentRole === "ca";
+  const isManager = !isCA; // tout profil non-CAF est considéré "manager" pour la vue d'ensemble
   document.querySelectorAll(".admin-only").forEach(el => el.style.display = isAdmin ? "" : "none");
   document.querySelectorAll(".caf-only").forEach(el => el.style.display = isCA ? "" : "none");
+  document.querySelectorAll(".manager-only").forEach(el => el.style.display = isManager ? "" : "none");
 
   loadAllData();
 }
@@ -997,6 +1005,44 @@ function openModal(id) { document.getElementById(id).classList.add("open"); }
 // ════════════════════════════════════════════════════════
 // DASHBOARD
 // ════════════════════════════════════════════════════════
+function renderEtapesGrid() {
+  const grid = document.getElementById("dash_etapes_grid");
+  if (!grid) return;
+
+  // Liste ordonnée de toutes les étapes possibles tous circuits confondus
+  const ETAPES_ORDER = [
+    { role: "ca", label: "Chargé d'affaires" },
+    { role: "chef_agence", label: "Chef d'agence" },
+    { role: "resp_commercial", label: "Resp. commercial" },
+    { role: "dir_exploitation", label: "Dir. exploitation" },
+    { role: "analyste_risque", label: "Analyste risque" },
+    { role: "resp_risque", label: "Resp. risque" },
+    { role: "dg", label: "DG" },
+    { role: "comite", label: "Comité sup. crédit" },
+    { role: "engagements", label: "Engagements" }
+  ];
+
+  const actifs = dossiers.filter(d => d.statut === "progress" || d.statut === "new");
+
+  const counts = {};
+  ETAPES_ORDER.forEach(e => counts[e.role] = 0);
+  actifs.forEach(d => {
+    const circuit = CIRCUITS[d.tranche];
+    if (!circuit) return;
+    const role = circuit.roles[d.etape_idx];
+    if (counts[role] !== undefined) counts[role]++;
+  });
+
+  grid.innerHTML = ETAPES_ORDER.map(e => {
+    const n = counts[e.role];
+    const roleStyle = ROLES[e.role] || { color: "#6b7a99", bg: "#f5f7fa" };
+    return `<div style="background:${roleStyle.bg};border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px;font-weight:700;color:${roleStyle.color}">${n}</div>
+      <div style="font-size:11px;color:${roleStyle.color};font-weight:600;margin-top:2px">${e.label}</div>
+    </div>`;
+  }).join("");
+}
+
 function renderDashboard() {
   const actifs = dossiers.filter(d => d.statut === "progress" || d.statut === "new" || d.statut === "adjourned");
   const volume = actifs.reduce((s, d) => s + (d.montant || 0), 0);
@@ -1008,6 +1054,8 @@ function renderDashboard() {
   document.getElementById("kpi_volume").textContent = fmtM(volume);
   document.getElementById("kpi_decaisses").textContent = decaisses.length;
   document.getElementById("kpi_ajournes").textContent = ajournes.length;
+
+  renderEtapesGrid();
 
   // Dossiers nécessitant action de l'utilisateur courant
   const actionDossiers = dossiers.filter(d => {
@@ -1242,6 +1290,7 @@ function openDetail(idx) {
   }
 
   renderCircuitFrise(d);
+  renderValidationsHistory(d);
   renderAnalyseForm(d);
   detailFiles = [...(d.files || [])];
   renderFilesList("dm_files_list", detailFiles, false);
@@ -1268,6 +1317,22 @@ function renderCircuitFrise(d) {
     html += '<span class="frise-arrow">→</span><span class="frise-step notaire">⚖️ Notaire</span>';
   }
   document.getElementById("dm_circuit").innerHTML = html;
+}
+
+function renderValidationsHistory(d) {
+  const container = document.getElementById("dm_validations");
+  const validations = d.validations || [];
+  if (!validations.length) {
+    container.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:8px 0">Aucune validation enregistrée pour le moment.</div>`;
+    return;
+  }
+  container.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px">${validations.map(v => `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+      <div style="font-size:13px;font-weight:600;color:var(--navy)">${v.etape} — favorable</div>
+      <div style="font-size:12px;color:var(--text);margin-top:2px">${fmt(v.montant)} FCFA sur ${v.duree} mois</div>
+      ${v.avis ? `<div style="font-size:12px;color:var(--muted);margin-top:3px;font-style:italic">"${v.avis}"</div>` : ''}
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Par ${v.user} · ${fmtDT(v.date)}</div>
+    </div>`).join("")}</div>`;
 }
 
 function renderModalActions(d) {
@@ -1301,11 +1366,60 @@ function renderModalActions(d) {
     return;
   }
 
+  // Cas spécial : étape Engagements → menu déroulant de statuts dédiés
+  if (currentStepRole === "engagements") {
+    renderEngagementsActions(d);
+    return;
+  }
+
+  // Cas général : formulaire montant proposé + durée proposée + avis, avant les boutons
   container.innerHTML = `
-    <button class="btn-secondary" onclick="closeModal('detailModal')">Fermer</button>
-    <button class="btn-danger" onclick="rejeterDossier()">❌ Rejeter</button>
-    <button class="btn-amber" onclick="closeModal('detailModal');openAjournement()">⏸ Ajourner</button>
-    <button class="btn-primary" onclick="avancerDossier()">✅ Valider et transmettre</button>
+    <div style="width:100%;display:flex;flex-direction:column;gap:12px">
+      <div class="form-grid" style="width:100%">
+        <div class="form-group">
+          <label>Montant proposé (FCFA)</label>
+          <input type="number" id="val_montant" value="${d.montant}" min="0">
+        </div>
+        <div class="form-group">
+          <label>Durée proposée (mois)</label>
+          <input type="number" id="val_duree" value="${d.duree}" min="1">
+        </div>
+      </div>
+      <div class="form-group full" style="width:100%">
+        <label>Commentaire / avis (optionnel)</label>
+        <textarea id="val_avis" placeholder="Précisions sur votre validation..." style="min-height:50px"></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;width:100%">
+        <button class="btn-secondary" onclick="closeModal('detailModal')">Fermer</button>
+        <button class="btn-danger" onclick="rejeterDossier()">❌ Rejeter</button>
+        <button class="btn-amber" onclick="closeModal('detailModal');openAjournement()">⏸ Ajourner</button>
+        <button class="btn-primary" onclick="avancerDossier()">✅ Valider et transmettre</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderEngagementsActions(d) {
+  const container = document.getElementById("dm_actions");
+  const currentEngStatut = d.eng_statut || "doc_attente";
+  container.innerHTML = `
+    <div style="width:100%;display:flex;flex-direction:column;gap:12px">
+      <div class="form-group full" style="width:100%">
+        <label>Statut du dossier — Engagements</label>
+        <select id="eng_statut_select">
+          <option value="doc_attente" ${currentEngStatut === 'doc_attente' ? 'selected' : ''}>En attente de document</option>
+          <option value="convention_edition" ${currentEngStatut === 'convention_edition' ? 'selected' : ''}>Convention en édition</option>
+          <option value="convention_transmise" ${currentEngStatut === 'convention_transmise' ? 'selected' : ''}>Convention transmise</option>
+          <option value="mep_effectue" ${currentEngStatut === 'mep_effectue' ? 'selected' : ''}>MEP effectué</option>
+          <option value="regularisation" ${currentEngStatut === 'regularisation' ? 'selected' : ''}>En attente de régularisation</option>
+        </select>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;width:100%">
+        <button class="btn-secondary" onclick="closeModal('detailModal')">Fermer</button>
+        <button class="btn-danger" onclick="rejeterDossier()">❌ Rejeter</button>
+        <button class="btn-primary" onclick="updateEngagementsStatut()">💾 Mettre à jour le statut</button>
+      </div>
+    </div>
   `;
 }
 
@@ -1439,6 +1553,30 @@ async function avancerDossier() {
   const d = dossiers[currentDossierIdx];
   const circuit = CIRCUITS[d.tranche];
   const isLastStep = d.etape_idx >= circuit.steps.length - 1;
+  const currentStepRole = circuit.roles[d.etape_idx];
+  const currentStepLabel = circuit.steps[d.etape_idx];
+
+  // Capturer montant proposé / durée proposée / avis de l'étape actuelle
+  const montantProp = parseInt(document.getElementById("val_montant")?.value) || d.montant;
+  const dureeProp = parseInt(document.getElementById("val_duree")?.value) || d.duree;
+  const avisProp = document.getElementById("val_avis")?.value.trim() || "";
+
+  if (!d.validations) d.validations = [];
+  d.validations.push({
+    etape: currentStepLabel,
+    role: currentStepRole,
+    user: currentUser.nom,
+    montant: montantProp,
+    duree: dureeProp,
+    avis: avisProp,
+    date: new Date().toISOString()
+  });
+
+  const avisTxt = avisProp ? ` — "${avisProp}"` : "";
+  addHistoryEntry(d, {
+    t: "validation", label: `${currentStepLabel} : favorable — ${fmt(montantProp)} FCFA sur ${dureeProp} mois${avisTxt}`,
+    user: currentUser.nom, icon: "✅", cls: "h-gr"
+  });
 
   if (isLastStep) {
     d.statut = "done";
@@ -1453,10 +1591,48 @@ async function avancerDossier() {
   }
 
   try {
-    await sbUpdate("ct_dossiers", d.id, { etape_idx: d.etape_idx, statut: d.statut, history: d.history });
+    await sbUpdate("ct_dossiers", d.id, { etape_idx: d.etape_idx, statut: d.statut, history: d.history, validations: d.validations });
     closeModal("detailModal");
     renderDashboard(); renderDossiers();
     toast(d.statut === "done" ? "Dossier décaissé ✅" : "Étape validée — transmis à l'étape suivante", "success");
+  } catch (e) { toast("Erreur : " + e.message, "error"); }
+}
+
+// ════════════════════════════════════════════════════════
+// ENGAGEMENTS — STATUTS DÉTAILLÉS
+// ════════════════════════════════════════════════════════
+const ENG_STATUT_LABELS = {
+  doc_attente: "En attente de document",
+  convention_edition: "Convention en édition",
+  convention_transmise: "Convention transmise",
+  mep_effectue: "MEP effectué",
+  regularisation: "En attente de régularisation"
+};
+
+async function updateEngagementsStatut() {
+  const d = dossiers[currentDossierIdx];
+  const newStatut = document.getElementById("eng_statut_select").value;
+  d.eng_statut = newStatut;
+
+  addHistoryEntry(d, {
+    t: "eng_statut", label: `Engagements : ${ENG_STATUT_LABELS[newStatut]}`,
+    user: currentUser.nom, icon: "📋", cls: "h-bl"
+  });
+
+  const patch = { eng_statut: newStatut, history: d.history };
+
+  if (newStatut === "mep_effectue") {
+    d.statut = "done";
+    addHistoryEntry(d, { t: "done", label: "Dossier décaissé", user: currentUser.nom, icon: "✅", cls: "h-gr" });
+    patch.statut = "done";
+    patch.history = d.history;
+  }
+
+  try {
+    await sbUpdate("ct_dossiers", d.id, patch);
+    closeModal("detailModal");
+    renderDashboard(); renderDossiers();
+    toast(newStatut === "mep_effectue" ? "Dossier décaissé ✅" : "Statut mis à jour", "success");
   } catch (e) { toast("Erreur : " + e.message, "error"); }
 }
 
