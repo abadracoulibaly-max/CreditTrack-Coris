@@ -967,7 +967,8 @@ function renderDashboard() {
     if (!circuit) return false;
     if (d.statut === "adjourned") return currentRole === "ca" && d.ca === currentUser.nom;
     const currentStepRole = circuit.roles[d.etape_idx];
-    return currentStepRole === currentRole;
+    return currentStepRole === currentRole ||
+      (currentStepRole === "comite" && currentRole === "resp_risque");
   });
 
   const actionContainer = document.getElementById("dash_action_list");
@@ -1233,7 +1234,9 @@ function renderModalActions(d) {
   }
 
   const currentStepRole = circuit.roles[d.etape_idx];
-  const canAct = currentStepRole === currentRole;
+  // Double casquette : le Responsable Risque représente aussi le Comité supérieur crédit
+  const canAct = currentStepRole === currentRole ||
+    (currentStepRole === "comite" && currentRole === "resp_risque");
 
   if (!canAct) {
     container.innerHTML = `<button class="btn-secondary" onclick="closeModal('detailModal')">Fermer</button>
