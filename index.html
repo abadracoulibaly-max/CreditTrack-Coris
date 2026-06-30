@@ -350,6 +350,11 @@
       <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px">🔀 Répartition des dossiers par étape</div>
       <div id="dash_etapes_grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"></div>
     </div>
+    <div class="card manager-only" id="dash_engagements_card">
+      <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px">💰 Dossiers aux Engagements — par statut</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Cliquez sur une carte pour voir la liste des dossiers concernés</div>
+      <div id="dash_engagements_grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px"></div>
+    </div>
     <div class="card">
       <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px">📋 Dossiers nécessitant votre action</div>
       <div id="dash_action_list"></div>
@@ -366,9 +371,13 @@
       <div class="section-title">📁 Dossiers de crédit</div>
       <div class="section-desc">Liste complète des dossiers en circuit</div>
     </div>
+    <div id="dos_eng_filter_banner" style="display:none;align-items:center;justify-content:space-between;background:var(--navy-light);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:14px">
+      <span style="font-size:13px;font-weight:600;color:var(--navy)"></span>
+      <button class="btn-secondary" style="padding:6px 14px;font-size:12px" onclick="clearEngFilter();renderDossiers()">✕ Retirer le filtre</button>
+    </div>
     <div class="filter-bar">
-      <input type="text" id="dos_search" class="search-box" placeholder="🔍 Rechercher un client, un n° de dossier..." oninput="renderDossiers()">
-      <select id="dos_filter_statut" onchange="renderDossiers()">
+      <input type="text" id="dos_search" class="search-box" placeholder="🔍 Rechercher un client, un n° de dossier..." oninput="clearEngFilter();renderDossiers()">
+      <select id="dos_filter_statut" onchange="clearEngFilter();renderDossiers()">
         <option value="">Tous les statuts</option>
         <option value="new">Nouveau</option>
         <option value="progress">En cours</option>
@@ -376,7 +385,7 @@
         <option value="rejected">Rejeté</option>
         <option value="adjourned">Ajourné</option>
       </select>
-      <select id="dos_filter_tranche" onchange="renderDossiers()">
+      <select id="dos_filter_tranche" onchange="clearEngFilter();renderDossiers()">
         <option value="">Toutes tranches</option>
         <option value="t1">T1 — ≤ 2M</option>
         <option value="t2">T2 — 2-5M</option>
@@ -1043,6 +1052,50 @@ function renderEtapesGrid() {
   }).join("");
 }
 
+function renderEngagementsGrid() {
+  const grid = document.getElementById("dash_engagements_grid");
+  if (!grid) return;
+
+  // Tous les dossiers déjà passés ou actuellement aux Engagements
+  const dossiersEng = dossiers.filter(d => {
+    const circuit = CIRCUITS[d.tranche];
+    if (!circuit) return false;
+    const isAtEngagements = circuit.roles[d.etape_idx] === "engagements" && d.statut === "progress";
+    const isDoneViaEng = d.statut === "done" && d.eng_statut === "mep_effectue";
+    return isAtEngagements || isDoneViaEng;
+  });
+
+  const STATUTS_ENG = [
+    { key: "doc_attente", label: "En attente de document", color: "#92400e", bg: "#fffbeb" },
+    { key: "convention_edition", label: "Convention en édition", color: "#1e40af", bg: "#dbeafe" },
+    { key: "convention_transmise", label: "Convention transmise", color: "#075985", bg: "#e0f2fe" },
+    { key: "regularisation", label: "En attente de régularisation", color: "#9d174d", bg: "#fce7f3" },
+    { key: "mep_effectue", label: "MEP effectué", color: "#15803d", bg: "#f0fdf4" }
+  ];
+
+  grid.innerHTML = STATUTS_ENG.map(s => {
+    const list = dossiersEng.filter(d => (d.eng_statut || "doc_attente") === s.key);
+    return `<div onclick="openDossiersFiltered('eng_statut','${s.key}')" style="cursor:pointer;background:${s.bg};border-radius:10px;padding:14px;text-align:center;transition:transform .12s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+      <div style="font-size:24px;font-weight:700;color:${s.color}">${list.length}</div>
+      <div style="font-size:11px;color:${s.color};font-weight:600;margin-top:3px">${s.label}</div>
+    </div>`;
+  }).join("");
+}
+
+function openDossiersFiltered(filterType, filterValue) {
+  showTab("dossiers", document.querySelector(".nav-tab[onclick*=dossiers]"));
+  // Stocker le filtre pour que renderDossiers() en tienne compte
+  window._dossiersEngFilter = filterValue;
+  document.getElementById("dos_search").value = "";
+  document.getElementById("dos_filter_statut").value = "";
+  document.getElementById("dos_filter_tranche").value = "";
+  renderDossiers();
+}
+
+function clearEngFilter() {
+  window._dossiersEngFilter = null;
+}
+
 function renderDashboard() {
   const actifs = dossiers.filter(d => d.statut === "progress" || d.statut === "new" || d.statut === "adjourned");
   const volume = actifs.reduce((s, d) => s + (d.montant || 0), 0);
@@ -1056,6 +1109,7 @@ function renderDashboard() {
   document.getElementById("kpi_ajournes").textContent = ajournes.length;
 
   renderEtapesGrid();
+  renderEngagementsGrid();
 
   // Dossiers nécessitant action de l'utilisateur courant
   const actionDossiers = dossiers.filter(d => {
@@ -1125,11 +1179,25 @@ function renderDossiers() {
   const search = (document.getElementById("dos_search")?.value || "").toLowerCase();
   const filterStatut = document.getElementById("dos_filter_statut")?.value || "";
   const filterTranche = document.getElementById("dos_filter_tranche")?.value || "";
+  const engFilter = window._dossiersEngFilter || null;
 
   let list = getVisibleDossiers();
   if (search) list = list.filter(d => d.client.toLowerCase().includes(search) || d.dossier_id.toLowerCase().includes(search));
   if (filterStatut) list = list.filter(d => d.statut === filterStatut);
   if (filterTranche) list = list.filter(d => d.tranche === filterTranche);
+  if (engFilter) list = list.filter(d => (d.eng_statut || "doc_attente") === engFilter);
+
+  // Bandeau de filtre actif (statut Engagements)
+  const banner = document.getElementById("dos_eng_filter_banner");
+  if (banner) {
+    if (engFilter) {
+      const ENG_LABELS = { doc_attente: "En attente de document", convention_edition: "Convention en édition", convention_transmise: "Convention transmise", regularisation: "En attente de régularisation", mep_effectue: "MEP effectué" };
+      banner.style.display = "flex";
+      banner.querySelector("span").textContent = `Filtre actif : ${ENG_LABELS[engFilter] || engFilter}`;
+    } else {
+      banner.style.display = "none";
+    }
+  }
 
   const tbody = document.getElementById("dossiers_table");
   if (!list.length) {
